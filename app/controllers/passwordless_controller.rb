@@ -1,0 +1,98 @@
+class PasswordlessController < ApplicationController
+  def create
+    email = params[:email]
+
+    # try to create the user if they don’t exist
+    begin
+      client.admin_get_user(
+        user_pool_id: ENV["COGNITO_USER_POOL_ID"],
+        username: email,
+      )
+    rescue Aws::CognitoIdentityProvider::Errors::UserNotFoundException
+      client.admin_create_user(
+        user_pool_id: ENV["COGNITO_USER_POOL_ID"],
+        username: email,
+        user_attributes: [{ name: "email", value: email }],
+        message_action: "SUPPRESS",
+      )
+    end
+
+    # Start custom auth to trigger your Lambda to send the link
+    resp = client.initiate_auth(
+      client_id: ENV["COGNITO_CLIENT_ID"],
+      auth_flow: "CUSTOM_AUTH",
+      auth_parameters: { "USERNAME" => email },
+    )
+
+    session[:email] = email
+    session[:login] = resp.session
+
+    redirect_to passwordless_path
+  rescue StandardError => e
+    Rails.logger.error(e)
+    redirect_to login_path, alert: "Something went wrong. Please try again."
+  end
+
+  def show
+    @email = session[:email]
+    if @email.nil?
+      redirect_to login_path
+    end
+  end
+
+  def callback
+    email = params[:email]
+    token = params[:token]
+    auth = session[:login]
+    session[:login] = nil
+
+    result = client.respond_to_auth_challenge(
+      client_id: ENV["COGNITO_CLIENT_ID"],
+      challenge_name: "CUSTOM_CHALLENGE",
+      session: auth,
+      challenge_responses: {
+        "USERNAME" => email,
+        "ANSWER" => token,
+      },
+    )
+
+    # Set email as verified
+    client.admin_update_user_attributes({
+      user_pool_id: ENV["COGNITO_USER_POOL_ID"],
+      username: email,
+      user_attributes: [{ name: "email_verified", value: "true" }],
+    })
+
+    cookies.encrypted[:id_token] = {
+      value: result.authentication_result.id_token,
+      httponly: true,
+      domain: ".#{current_consumer.cookie_domain}",
+      secure: Rails.env.production?,
+      expires: 1.hour.from_now,
+    }
+
+    cookies.encrypted[:access_token] = {
+      value: result.authentication_result.access_token,
+      httponly: true,
+      domain: ".#{current_consumer.cookie_domain}",
+      secure: Rails.env.production?,
+      expires: 1.hour.from_now,
+    }
+
+    redirect_to current_consumer.return_url, allow_other_host: true
+  rescue Aws::CognitoIdentityProvider::Errors::NotAuthorizedException
+    redirect_to login_path, alert: "Invalid or expired login link"
+  rescue StandardError => e
+    Rails.logger.error(e)
+    redirect_to login_path, alert: "Something went wrong. Please try again."
+  end
+
+private
+
+  def client
+    @client ||= Aws::CognitoIdentityProvider::Client.new(
+      region: ENV["AWS_REGION"],
+      profile: ENV["AWS_PROFILE"],
+    )
+  end
+end

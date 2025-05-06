@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html class="govuk-template app-html-class">
+  <head>
+    <title><%= content_for(:title) || "UK Trade Tariff Service" %></title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta charset="utf-8">
+    <meta name="theme-color" content="blue">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+
+    <%= favicon_link_tag 'favicon.ico' %>
+    <%= favicon_link_tag 'favicon.svg' %>
+    <%= favicon_link_tag 'govuk-icon-mask.svg', rel: 'mask-icon', type: 'image/svg', color: "#0b1c0c" %>
+    <%= favicon_link_tag 'govuk-icon-180.png', rel: 'apple-touch-icon', type: 'image/png', size: '180x180' %>
+
+    <%= stylesheet_link_tag "govuk-frontend.min", "data-turbo-track": "reload" %>
+
+    <%= javascript_importmap_tags %>
+  </head>
+
+  <%= govuk_header(homepage_url: ENV.fetch("GOVUK_APP_DOMAIN", "http://localhost:3000"), service_name: "UK Trade Tariff Service", service_url: "#") %>
+
+  <body class="govuk-template__body app-body-class">
+    <div class="govuk-width-container app-width-container">
+    <script>document.body.className += ' js-enabled' + ('noModule' in HTMLScriptElement.prototype ? ' govuk-frontend-supported' : '');</script>
+    <main class="govuk-main-wrapper app-main-class" id="main-content">
+      <%= yield %>
+    </main>
+  </div>
+  </body>
+
+  <%= govuk_footer %>
+</html>
