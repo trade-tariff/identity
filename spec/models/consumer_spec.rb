@@ -17,8 +17,7 @@ RSpec.describe Consumer, type: :model do
   end
 
   describe ".load" do
-    context "when the consumer exists" do
-      # rubocop:disable RSpec/MultipleExpectations
+    context "when the consumer exists", :aggregate_failures do
       it "returns a Consumer instance with the correct attributes" do
         consumer = described_class.load(consumer_id)
 
@@ -26,7 +25,6 @@ RSpec.describe Consumer, type: :model do
         expect(consumer.id).to eq(consumer_id)
         expect(consumer.methods).to eq(methods)
       end
-      # rubocop:enable RSpec/MultipleExpectations
     end
 
     context "when the consumer does not exist" do
