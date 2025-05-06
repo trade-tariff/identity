@@ -1,7 +1,0 @@
-# MyOTT Subscriptions
-development:
-  - id: 9ddb7142-0588-45e5-8add-eecdcf7a62d1
-    return_url: <%= ENV.fetch("MYOTT_RETURN_URL", "") %>
-    cookie_domain: <%= ENV.fetch("MYOTT_COOKIE_DOMAIN", "") %>
-    methods:
-      - :passwordless
