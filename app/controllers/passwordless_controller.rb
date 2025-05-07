@@ -5,12 +5,12 @@ class PasswordlessController < ApplicationController
     # try to create the user if they don’t exist
     begin
       client.admin_get_user(
-        user_pool_id: ENV["COGNITO_USER_POOL_ID"],
+        user_pool_id: TradeTariffIdentity.cognito_user_pool_id,
         username: email,
       )
     rescue Aws::CognitoIdentityProvider::Errors::UserNotFoundException
       client.admin_create_user(
-        user_pool_id: ENV["COGNITO_USER_POOL_ID"],
+        user_pool_id: TradeTariffIdentity.cognito_user_pool_id,
         username: email,
         user_attributes: [{ name: "email", value: email }],
         message_action: "SUPPRESS",
@@ -19,7 +19,7 @@ class PasswordlessController < ApplicationController
 
     # Start custom auth to trigger your Lambda to send the link
     resp = client.initiate_auth(
-      client_id: ENV["COGNITO_CLIENT_ID"],
+      client_id: TradeTariffIdentity.cognito_client_id,
       auth_flow: "CUSTOM_AUTH",
       auth_parameters: { "USERNAME" => email },
     )
@@ -47,7 +47,7 @@ class PasswordlessController < ApplicationController
     session[:login] = nil
 
     result = client.respond_to_auth_challenge(
-      client_id: ENV["COGNITO_CLIENT_ID"],
+      client_id: TradeTariffIdentity.cognito_client_id,
       challenge_name: "CUSTOM_CHALLENGE",
       session: auth,
       challenge_responses: {
@@ -58,7 +58,7 @@ class PasswordlessController < ApplicationController
 
     # Set email as verified
     client.admin_update_user_attributes({
-      user_pool_id: ENV["COGNITO_USER_POOL_ID"],
+      user_pool_id: TradeTariffIdentity.cognito_user_pool_id,
       username: email,
       user_attributes: [{ name: "email_verified", value: "true" }],
     })
@@ -90,9 +90,6 @@ class PasswordlessController < ApplicationController
 private
 
   def client
-    @client ||= Aws::CognitoIdentityProvider::Client.new(
-      region: ENV["AWS_REGION"],
-      profile: ENV["AWS_PROFILE"],
-    )
+    @client ||= TradeTariffIdentity.cognito_client
   end
 end
