@@ -27,9 +27,18 @@ RSpec.describe "Passwordless", type: :request do
       expect(cognito).to have_received(:admin_create_user)
     end
 
-    it "initiates auth" do
+    it "initiates auth with auth params" do
       post passwordless_path, params: { email: }
-      expect(cognito).to have_received(:initiate_auth)
+      expect(cognito).to have_received(:initiate_auth).with(
+        hash_including(auth_parameters: hash_including("USERNAME" => email)),
+      )
+    end
+
+    it "initiates auth with metadata params" do
+      post passwordless_path, params: { email: }
+      expect(cognito).to have_received(:initiate_auth).with(
+        hash_including(client_metadata: hash_including("consumer" => consumer.id)),
+      )
     end
 
     it "sets the session email" do
@@ -86,6 +95,11 @@ RSpec.describe "Passwordless", type: :request do
         allow(cognito).to receive(:admin_update_user_attributes)
       end
 
+      it "sets the consumer id in session" do
+        get callback_passwordless_path, params: { email:, token: "token", consumer: "new_consumer" }
+        expect(session[:consumer_id]).to eq("new_consumer")
+      end
+
       it "responds to auth challenge" do
         get callback_passwordless_path, params: { email:, token: "token" }
         expect(cognito).to have_received(:respond_to_auth_challenge)
@@ -99,11 +113,6 @@ RSpec.describe "Passwordless", type: :request do
       it "sets id_token cookie" do
         get callback_passwordless_path, params: { email:, token: "token" }
         expect(cookies["id_token"]).to be_a(String)
-      end
-
-      it "sets access_token cookie" do
-        get callback_passwordless_path, params: { email:, token: "token" }
-        expect(cookies["access_token"]).to be_a(String)
       end
 
       it "redirects to the consumer's return URL" do

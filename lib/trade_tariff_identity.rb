@@ -12,4 +12,8 @@ module_function
   def cognito_user_pool_id
     ENV["COGNITO_USER_POOL_ID"]
   end
+
+  def encryption_secret
+    ENV["ENCRYPTION_SECRET"]
+  end
 end
