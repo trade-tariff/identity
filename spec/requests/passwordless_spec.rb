@@ -10,7 +10,7 @@ RSpec.describe "Passwordless", type: :request do
     allow(Consumer).to receive(:load).with(consumer.id).and_return(consumer)
     get root_path, params: { consumer_id: consumer.id }
 
-    allow(Aws::CognitoIdentityProvider::Client).to receive(:new).and_return(cognito)
+    allow(TradeTariffIdentity).to receive(:cognito_client).and_return(cognito)
     allow(cognito).to receive(:admin_get_user).and_raise(Aws::CognitoIdentityProvider::Errors::UserNotFoundException.new(nil, "User not found"))
     allow(cognito).to receive(:admin_create_user)
     allow(cognito).to receive(:initiate_auth).and_return(cognito_auth_object)

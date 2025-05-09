@@ -1,19 +1,17 @@
-name: ci
+name: CI
 
 on:
   push:
-    branches-ignore:
+    branches:
       - main
   pull_request:
-    branches-ignore:
-      - main
   workflow_dispatch:
 
 env:
   AWS_REGION: eu-west-2
-  BUNDLE_JOBS: "3"
-  BUNDLE_RETRY: "3"
-  RAILS_ENV: test
+  ENVIRONMENT: development
+  IAM_ROLE_ARN: arn:aws:iam::844815912454:role/GithubActions-ECS-Deployments-Role
+  SKIP: terraform_docs,actionlint-docker
 
 permissions:
   contents: read
@@ -39,6 +37,14 @@ jobs:
         with:
           ruby-version: ${{ steps.ruby-version.outputs.RUBY_VERSION }}
           bundler-cache: true
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.11
+      - uses: trade-tariff/trade-tariff-tools/.github/actions/setup-tflint@main
+      - uses: trade-tariff/trade-tariff-tools/.github/actions/setup-ssh@main
+        with:
+          ssh-key: ${{ secrets.PRIVATE_SSH_KEY }}
+      - run: cd terraform/ && terraform init -backend=false -reconfigure
       - run: pip install pre-commit
       - run: pre-commit run --all-files
       - run: bundle exec brakeman
