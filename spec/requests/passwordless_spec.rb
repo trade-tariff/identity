@@ -10,10 +10,10 @@ RSpec.describe "Passwordless", type: :request do
     allow(Consumer).to receive(:load).with(consumer.id).and_return(consumer)
     get root_path, params: { consumer_id: consumer.id }
 
-    allow(Aws::CognitoIdentityProvider::Client).to receive(:new).and_return(cognito)
+    allow(TradeTariffIdentity).to receive(:cognito_client).and_return(cognito)
     allow(cognito).to receive(:admin_get_user).and_raise(Aws::CognitoIdentityProvider::Errors::UserNotFoundException.new(nil, "User not found"))
     allow(cognito).to receive(:admin_create_user)
-    allow(cognito).to receive(:initiate_auth).and_return(cognito_auth_object)
+    allow(cognito).to receive(:admin_initiate_auth).and_return(cognito_auth_object)
   end
 
   describe "POST /create" do
@@ -27,9 +27,11 @@ RSpec.describe "Passwordless", type: :request do
       expect(cognito).to have_received(:admin_create_user)
     end
 
-    it "initiates auth" do
+    it "initiates auth with auth params" do
       post passwordless_path, params: { email: }
-      expect(cognito).to have_received(:initiate_auth)
+      expect(cognito).to have_received(:admin_initiate_auth).with(
+        hash_including(auth_parameters: hash_including("USERNAME" => email)),
+      )
     end
 
     it "sets the session email" do
@@ -48,7 +50,7 @@ RSpec.describe "Passwordless", type: :request do
     end
 
     it "redirects to login_path on error" do
-      allow(cognito).to receive(:initiate_auth).and_raise(StandardError.new("Error"))
+      allow(cognito).to receive(:admin_initiate_auth).and_raise(StandardError.new("Error"))
       post passwordless_path, params: { email: }
       expect(response).to redirect_to(login_path)
     end
@@ -86,6 +88,11 @@ RSpec.describe "Passwordless", type: :request do
         allow(cognito).to receive(:admin_update_user_attributes)
       end
 
+      it "sets the consumer id in session" do
+        get callback_passwordless_path, params: { email:, token: "token", consumer: "new_consumer" }
+        expect(session[:consumer_id]).to eq("new_consumer")
+      end
+
       it "responds to auth challenge" do
         get callback_passwordless_path, params: { email:, token: "token" }
         expect(cognito).to have_received(:respond_to_auth_challenge)
@@ -99,11 +106,6 @@ RSpec.describe "Passwordless", type: :request do
       it "sets id_token cookie" do
         get callback_passwordless_path, params: { email:, token: "token" }
         expect(cookies["id_token"]).to be_a(String)
-      end
-
-      it "sets access_token cookie" do
-        get callback_passwordless_path, params: { email:, token: "token" }
-        expect(cookies["access_token"]).to be_a(String)
       end
 
       it "redirects to the consumer's return URL" do

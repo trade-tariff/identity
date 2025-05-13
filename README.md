@@ -38,7 +38,7 @@ Start the app with
 bin/dev
 ```
 
-Go to the [Login page](http://localhost:3005/9ddb7142-0588-45e5-8add-eecdcf7a62d1)
+Go to the [Login page](http://localhost:3005/myott)
 
 ## Passwordless Login
 

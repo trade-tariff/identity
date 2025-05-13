@@ -5,12 +5,12 @@ class PasswordlessController < ApplicationController
     # try to create the user if they don’t exist
     begin
       client.admin_get_user(
-        user_pool_id: ENV["COGNITO_USER_POOL_ID"],
+        user_pool_id: TradeTariffIdentity.cognito_user_pool_id,
         username: email,
       )
     rescue Aws::CognitoIdentityProvider::Errors::UserNotFoundException
       client.admin_create_user(
-        user_pool_id: ENV["COGNITO_USER_POOL_ID"],
+        user_pool_id: TradeTariffIdentity.cognito_user_pool_id,
         username: email,
         user_attributes: [{ name: "email", value: email }],
         message_action: "SUPPRESS",
@@ -18,8 +18,9 @@ class PasswordlessController < ApplicationController
     end
 
     # Start custom auth to trigger your Lambda to send the link
-    resp = client.initiate_auth(
-      client_id: ENV["COGNITO_CLIENT_ID"],
+    resp = client.admin_initiate_auth(
+      user_pool_id: TradeTariffIdentity.cognito_user_pool_id,
+      client_id: TradeTariffIdentity.cognito_client_id,
       auth_flow: "CUSTOM_AUTH",
       auth_parameters: { "USERNAME" => email },
     )
@@ -42,12 +43,16 @@ class PasswordlessController < ApplicationController
 
   def callback
     email = params[:email]
+    consumer_id = params[:consumer]
     token = params[:token]
     auth = session[:login]
-    session[:login] = nil
+
+    if consumer_id.present?
+      session[:consumer_id] = consumer_id
+    end
 
     result = client.respond_to_auth_challenge(
-      client_id: ENV["COGNITO_CLIENT_ID"],
+      client_id: TradeTariffIdentity.cognito_client_id,
       challenge_name: "CUSTOM_CHALLENGE",
       session: auth,
       challenge_responses: {
@@ -58,25 +63,16 @@ class PasswordlessController < ApplicationController
 
     # Set email as verified
     client.admin_update_user_attributes({
-      user_pool_id: ENV["COGNITO_USER_POOL_ID"],
+      user_pool_id: TradeTariffIdentity.cognito_user_pool_id,
       username: email,
       user_attributes: [{ name: "email_verified", value: "true" }],
     })
 
-    cookies.encrypted[:id_token] = {
-      value: result.authentication_result.id_token,
+    cookies[:id_token] = {
+      value: EncryptionService.encrypt_string(result.authentication_result.id_token),
       httponly: true,
       domain: ".#{current_consumer.cookie_domain}",
-      secure: Rails.env.production?,
-      expires: 1.hour.from_now,
-    }
-
-    cookies.encrypted[:access_token] = {
-      value: result.authentication_result.access_token,
-      httponly: true,
-      domain: ".#{current_consumer.cookie_domain}",
-      secure: Rails.env.production?,
-      expires: 1.hour.from_now,
+      expires: 1.day.from_now,
     }
 
     redirect_to current_consumer.return_url, allow_other_host: true
@@ -90,9 +86,6 @@ class PasswordlessController < ApplicationController
 private
 
   def client
-    @client ||= Aws::CognitoIdentityProvider::Client.new(
-      region: ENV["AWS_REGION"],
-      profile: ENV["AWS_PROFILE"],
-    )
+    @client ||= TradeTariffIdentity.cognito_client
   end
 end
