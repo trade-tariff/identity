@@ -16,4 +16,8 @@ module_function
   def encryption_secret
     ENV["ENCRYPTION_SECRET"]
   end
+
+  def api_tokens
+    ENV["API_TOKENS"]
+  end
 end
