@@ -8,20 +8,7 @@ module Api
 
     def authenticate
       authenticate_or_request_with_http_token do |provided_token, _options|
-        api_tokens.any? { |token| ActiveSupport::SecurityUtils.secure_compare(provided_token, token) }
-      end
-    end
-
-    def api_tokens
-      @api_tokens ||= read_tokens
-    end
-
-    def read_tokens
-      tokens = TradeTariffIdentity.api_tokens
-      if tokens.present?
-        tokens.split(",").map(&:strip)
-      else
-        []
+        TradeTariffIdentity.api_tokens.any? { |token| ActiveSupport::SecurityUtils.secure_compare(provided_token, token) }
       end
     end
   end

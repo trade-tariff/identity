@@ -18,6 +18,6 @@ module_function
   end
 
   def api_tokens
-    ENV["API_TOKENS"]
+    ENV["API_TOKENS"].to_s.split(",").map(&:strip)
   end
 end
