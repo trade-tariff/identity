@@ -1,6 +1,4 @@
 class ErrorsController < ApplicationController
-  skip_before_action :current_consumer
-
   def not_found
     message = "This page does not exist.".html_safe
 

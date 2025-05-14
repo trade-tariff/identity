@@ -1,7 +1,6 @@
 class ApplicationController < ActionController::Base
   default_form_builder GOVUKDesignSystemFormBuilder::FormBuilder
 
-  before_action :current_consumer
   helper_method :current_consumer
 
   def current_consumer
