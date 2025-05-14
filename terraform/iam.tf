@@ -18,7 +18,8 @@ data "aws_iam_policy_document" "task" {
     actions = [
       "cognito-idp:AdminCreateUser",
       "cognito-idp:AdminGetUser",
-      "cognito-idp:AdminUpdateUserAttributes"
+      "cognito-idp:AdminInitiateAuth",
+      "cognito-idp:AdminUpdateUserAttributes",
     ]
     resources = [data.aws_cognito_user_pool.this.arn]
   }
@@ -26,7 +27,6 @@ data "aws_iam_policy_document" "task" {
   statement {
     effect = "Allow"
     actions = [
-      "cognito-idp:InitiateAuth",
       "cognito-idp:RespondToAuthChallenge"
     ]
     resources = ["*"]
