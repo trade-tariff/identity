@@ -10,7 +10,7 @@ RSpec.describe "Sessions", type: :request do
     end
 
     context "when valid consumer_id is present" do
-      let(:consumer) { FactoryBot.build(:consumer) }
+      let(:consumer) { build(:consumer) }
 
       before do
         allow(Consumer).to receive(:load).with(consumer.id).and_return(consumer)
@@ -37,7 +37,7 @@ RSpec.describe "Sessions", type: :request do
     end
 
     context "when valid consumer_id is present" do
-      let(:consumer) { FactoryBot.build(:consumer) }
+      let(:consumer) { build(:consumer) }
 
       before do
         allow(Consumer).to receive(:load).with(consumer.id).and_return(consumer)

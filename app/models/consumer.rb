@@ -1,6 +1,5 @@
 class Consumer
   include ActiveModel::Model
-  include ActiveModel::Attributes
 
   def self.load(consumer_id)
     return nil unless consumer_id

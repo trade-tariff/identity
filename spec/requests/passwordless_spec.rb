@@ -2,7 +2,7 @@ require "rails_helper"
 
 RSpec.describe "Passwordless", type: :request do
   let(:cognito) { instance_double(Aws::CognitoIdentityProvider::Client) }
-  let(:consumer) { FactoryBot.build(:consumer) }
+  let(:consumer) { build(:consumer) }
   let(:cognito_auth_object) { Struct.new(:session).new("session") }
   let(:email) { "test@email.com" }
 
