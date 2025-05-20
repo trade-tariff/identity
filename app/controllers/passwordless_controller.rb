@@ -69,7 +69,7 @@ class PasswordlessController < ApplicationController
     })
 
     cookies[:id_token] = {
-      value: EncryptionService.encrypt_string(result.authentication_result.id_token[0]),
+      value: encrypted(result.authentication_result.id_token[0]),
       httponly: true,
       domain: ".#{current_consumer.cookie_domain}",
       expires: 1.day.from_now,
@@ -87,5 +87,13 @@ private
 
   def client
     @client ||= TradeTariffIdentity.cognito_client
+  end
+
+  def encrypted(token)
+    if Rails.env.development?
+      token
+    else
+      EncryptionService.encrypt_string(token)
+    end
   end
 end
