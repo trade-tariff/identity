@@ -45,3 +45,9 @@ Go to the [Login page](http://localhost:3005/myott)
 Shows how the login flow interacts with Cognito.
 
 ![Diagram](docs/passwordless_login_flow.png)
+
+### Cognito JWT
+
+When the user is redirected to the service, a Cognito JWT is set as a cookie called `id_token` which
+contains the user's details. In non-development environments the token is encrypted using `ENCRYPTION_SECRET`.
+This needs to be shared with the consuming service.
