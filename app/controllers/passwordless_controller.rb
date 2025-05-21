@@ -69,7 +69,7 @@ class PasswordlessController < ApplicationController
     })
 
     cookies[:id_token] = {
-      value: encrypted(result.authentication_result.id_token[0]),
+      value: encrypted(result.authentication_result.id_token),
       httponly: true,
       domain: ".#{current_consumer.cookie_domain}",
       expires: 1.day.from_now,
