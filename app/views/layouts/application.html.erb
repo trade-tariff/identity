@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="govuk-template app-html-class">
   <head>
-    <title><%= content_for(:title) || "UK Trade Tariff Service" %></title>
+    <title><%= content_for(:title) || "UK Integrated Online Tariff: Look up commodity codes, duty and VAT rates - GOV.UK" %></title>
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
@@ -20,7 +20,7 @@
     <%= javascript_importmap_tags %>
   </head>
 
-  <%= govuk_header(homepage_url: ENV.fetch("GOVUK_APP_DOMAIN", "http://localhost:3000"), service_name: "UK Trade Tariff Service", service_url: "#") %>
+  <%= govuk_header(homepage_url: "#", service_name: "UK Integrated Online Tariff", service_url: ENV.fetch('SERVICE_URL', "https://trade-tariff.service.gov.uk/find_commodity")) %>
 
   <body class="govuk-template__body app-body-class">
     <div class="govuk-width-container app-width-container">
