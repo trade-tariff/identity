@@ -11,7 +11,6 @@ env:
   AWS_REGION: eu-west-2
   ENVIRONMENT: development
   IAM_ROLE_ARN: arn:aws:iam::844815912454:role/GithubActions-ECS-Deployments-Role
-  SKIP: terraform_docs,actionlint-docker
 
 permissions:
   contents: read
@@ -31,11 +30,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3'
-      - id: ruby-version
-        run: echo "RUBY_VERSION=$(cat .ruby-version)" >> "$GITHUB_OUTPUT"
       - uses: ruby/setup-ruby@v1
         with:
-          ruby-version: ${{ steps.ruby-version.outputs.RUBY_VERSION }}
           bundler-cache: true
       - uses: hashicorp/setup-terraform@v3
         with:
@@ -44,6 +40,7 @@ jobs:
       - uses: trade-tariff/trade-tariff-tools/.github/actions/setup-ssh@main
         with:
           ssh-key: ${{ secrets.PRIVATE_SSH_KEY }}
+      - uses: trade-tariff/trade-tariff-tools/.github/actions/setup-terraform-docs@main
       - run: cd terraform/ && terraform init -backend=false -reconfigure
       - run: pip install pre-commit
       - run: pre-commit run --all-files
@@ -54,12 +51,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - id: ruby-version
-        run: echo "RUBY_VERSION=$(cat .ruby-version)" >> "$GITHUB_OUTPUT"
-
       - uses: ruby/setup-ruby@v1
         with:
-          ruby-version: ${{ steps.ruby-version.outputs.RUBY_VERSION }}
           bundler-cache: true
 
       - run: bundle exec rspec
