@@ -1,4 +1,4 @@
-name: Deploy to development
+name: Deploy to staging
 
 on:
   workflow_dispatch:
@@ -10,8 +10,8 @@ permissions:
 env:
   AWS_REGION: eu-west-2
   ECR_URL: 382373577178.dkr.ecr.eu-west-2.amazonaws.com/tariff-identity-production
-  ENVIRONMENT: development
-  IAM_ROLE_ARN: arn:aws:iam::844815912454:role/GithubActions-ECS-Deployments-Role
+  ENVIRONMENT: staging
+  IAM_ROLE_ARN: arn:aws:iam::451934005581:role/GithubActions-ECS-Deployments-Role
 
 jobs:
 
