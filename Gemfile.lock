@@ -166,6 +166,7 @@ GEM
       timeout
     net-smtp (0.5.1)
       net-protocol
+    newrelic_rpm (9.19.0)
     nio4r (2.7.4)
     nokogiri (1.18.8-aarch64-linux-gnu)
       racc (~> 1.4)
@@ -349,6 +350,7 @@ DEPENDENCIES
   govuk-components
   govuk_design_system_formbuilder
   importmap-rails
+  newrelic_rpm
   propshaft
   puma (>= 5.0)
   rails (~> 8.0.2)
