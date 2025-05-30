@@ -9,6 +9,7 @@ gem "bootsnap", require: false
 gem "govuk-components"
 gem "govuk_design_system_formbuilder"
 gem "importmap-rails"
+gem "newrelic_rpm"
 gem "propshaft"
 gem "puma", ">= 5.0"
 
