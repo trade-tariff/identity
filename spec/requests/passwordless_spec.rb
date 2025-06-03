@@ -109,25 +109,25 @@ RSpec.describe "Passwordless", type: :request do
         expect(cookies["id_token"]).to be_a(String)
       end
 
-      it "redirects to the consumer's return URL" do
+      it "redirects to the consumer's success URL" do
         get callback_passwordless_path, params: { email:, token: "token" }
-        expect(response).to redirect_to(consumer.return_url)
+        expect(response).to redirect_to(consumer.success_url)
       end
     end
 
     context "when link id invalid" do
-      it "redirects to login_path" do
+      it "redirects to the consumer's failure URL" do
         allow(cognito).to receive(:respond_to_auth_challenge).and_raise(Aws::CognitoIdentityProvider::Errors::NotAuthorizedException.new(nil, "Not authorized"))
         get callback_passwordless_path, params: { email:, token: "token" }
-        expect(response).to redirect_to(login_path)
+        expect(response).to redirect_to(consumer.failure_url)
       end
     end
 
     context "when an error occurs" do
-      it "redirects to login_path" do
+      it "redirects to the consumer's failure URL" do
         allow(cognito).to receive(:respond_to_auth_challenge).and_raise(StandardError.new("Error"))
         get callback_passwordless_path, params: { email:, token: "token" }
-        expect(response).to redirect_to(login_path)
+        expect(response).to redirect_to(consumer.failure_url)
       end
     end
   end

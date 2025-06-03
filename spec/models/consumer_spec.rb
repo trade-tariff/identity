@@ -7,7 +7,8 @@ RSpec.describe Consumer, type: :model do
     {
       id: consumer_id,
       methods: methods,
-      return_url: "https://example.com/return",
+      success_url: "https://example.com/return",
+      failure_url: "https://example.com/invalid",
       cookie_domain: "example.com",
     }
   end
@@ -24,6 +25,13 @@ RSpec.describe Consumer, type: :model do
         expect(consumer).to be_a(described_class)
         expect(consumer.id).to eq(consumer_id)
         expect(consumer.methods).to eq(methods)
+      end
+
+      it "returns a Consumer instance with the correct return urls" do
+        consumer = described_class.load(consumer_id)
+
+        expect(consumer.success_url).to eq("https://example.com/return")
+        expect(consumer.failure_url).to eq("https://example.com/invalid")
       end
     end
 

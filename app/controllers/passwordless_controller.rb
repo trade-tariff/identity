@@ -75,12 +75,12 @@ class PasswordlessController < ApplicationController
       expires: 1.day.from_now,
     }
 
-    redirect_to current_consumer.return_url, allow_other_host: true
+    redirect_to current_consumer.success_url, allow_other_host: true
   rescue Aws::CognitoIdentityProvider::Errors::NotAuthorizedException
-    redirect_to login_path, alert: "Invalid or expired login link"
+    redirect_to current_consumer.failure_url, allow_other_host: true
   rescue StandardError => e
     Rails.logger.error(e)
-    redirect_to login_path, alert: "Something went wrong. Please try again."
+    redirect_to current_consumer.failure_url, allow_other_host: true
   end
 
 private
