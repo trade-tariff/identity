@@ -12,11 +12,12 @@ class Consumer
 
     new(id: consumer_id,
         methods: consumer_attributes[:methods],
-        return_url: consumer_attributes[:return_url],
+        success_url: consumer_attributes[:success_url],
+        failure_url: consumer_attributes[:failure_url],
         cookie_domain: consumer_attributes[:cookie_domain])
   end
 
-  attr_accessor :id, :methods, :return_url, :cookie_domain
+  attr_accessor :id, :methods, :success_url, :failure_url, :cookie_domain
 
   def passwordless?
     methods.include?(:passwordless)

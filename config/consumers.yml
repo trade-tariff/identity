@@ -1,14 +1,16 @@
 # MyOTT Subscriptions
 development:
   - id: myott
-    return_url: http://localhost:3001/subscriptions
+    success_url: http://localhost:3001/subscriptions
+    failure_url: http://localhost:3001/subscriptions/invalid
     cookie_domain: localhost
     methods:
       - :passwordless
 
 production:
   - id: <%= ENV.fetch("MYOTT_ID", "") %>
-    return_url: <%= ENV.fetch("MYOTT_RETURN_URL", "") %>
+    success_url: <%= URI.join(ENV.fetch("MYOTT_BASE_URL", ""), "/subscriptions").to_s %>
+    failure_url: <%= URI.join(ENV.fetch("MYOTT_BASE_URL", ""), "/subscriptions/invalid").to_s %>
     cookie_domain: <%= ENV.fetch("MYOTT_COOKIE_DOMAIN", "") %>
     methods:
       - :passwordless
