@@ -9,8 +9,8 @@ development:
 
 production:
   - id: <%= ENV.fetch("MYOTT_ID", "") %>
-    success_url: <%= URI.join(ENV.fetch("MYOTT_BASE_URL", ""), "/subscriptions").to_s %>
-    failure_url: <%= URI.join(ENV.fetch("MYOTT_BASE_URL", ""), "/subscriptions/invalid").to_s %>
+    success_url: <%= URI.join(ENV.fetch("MYOTT_BASE_URL", "https://www.trade-tariff.service.gov.uk"), "/subscriptions").to_s %>
+    failure_url: <%= URI.join(ENV.fetch("MYOTT_BASE_URL", "https://www.trade-tariff.service.gov.uk"), "/subscriptions/invalid").to_s %>
     cookie_domain: <%= ENV.fetch("MYOTT_COOKIE_DOMAIN", "") %>
     methods:
       - :passwordless
