@@ -1,5 +1,27 @@
 <h1 class="govuk-heading-l">Check your email</h1>
 
-<p class="govuk-body">We've sent an email to <strong><%= @email %></strong></p>
-<p class="govuk-body">Click the link in the email to sign in</p>
-<p class="govuk-body">The link will stop working after 15 minutes</p>
+<p class="govuk-body">An email has been sent to <strong><%= @email %></strong></p>
+<p class="govuk-body">You must follow the link in the email to verify your email address.</p>
+<div class="govuk-inset-text">The link will stop working after 15 minutes.</div>
+
+<details class="govuk-details">
+  <summary class="govuk-details__summary">
+    <span class="govuk-details__summary-text">
+      Not received an email?
+    </span>
+  </summary>
+
+  <div class="govuk-details__text">
+    <p class="govuk-body">
+      Emails sometimes take a few minutes to arrive.
+    </p>
+
+    <p class="govuk-body">
+      If you do not receive an email soon, check your spam or junk folder.
+    </p>
+
+    <p class="govuk-body">
+      If this does not work, <a class="govuk-link" href="mailto:tariffmanagement@hmrc.gov.uk">contact us</a> for help.
+    </p>
+  </div>
+</details>
