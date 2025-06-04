@@ -17,6 +17,12 @@ class PasswordlessController < ApplicationController
       )
     end
 
+    client.admin_add_user_to_group(
+      user_pool_id: TradeTariffIdentity.cognito_user_pool_id,
+      username: email,
+      group_name: current_consumer.id,
+    )
+
     # Start custom auth to trigger your Lambda to send the link
     resp = client.admin_initiate_auth(
       user_pool_id: TradeTariffIdentity.cognito_user_pool_id,
