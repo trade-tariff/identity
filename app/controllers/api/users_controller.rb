@@ -1,7 +1,7 @@
 module Api
   class UsersController < Api::ApplicationController
     def show
-      user = User.find(params[:id])
+      user = User.find(params[:id], @group)
       if user
         render json: { user: }, status: :ok
       else
