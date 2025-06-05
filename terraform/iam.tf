@@ -16,6 +16,7 @@ data "aws_iam_policy_document" "task" {
   statement {
     effect = "Allow"
     actions = [
+      "cognito-idp:AdminAddUserToGroup",
       "cognito-idp:AdminCreateUser",
       "cognito-idp:AdminGetUser",
       "cognito-idp:AdminInitiateAuth",
