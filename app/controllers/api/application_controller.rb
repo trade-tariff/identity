@@ -8,7 +8,16 @@ module Api
 
     def authenticate
       authenticate_or_request_with_http_token do |provided_token, _options|
-        TradeTariffIdentity.api_tokens.any? { |token| ActiveSupport::SecurityUtils.secure_compare(provided_token, token) }
+        api_group_token_hash = TradeTariffIdentity.api_tokens.find do |_group, token|
+          ActiveSupport::SecurityUtils.secure_compare(token, provided_token)
+        end
+
+        if api_group_token_hash
+          @group = api_group_token_hash.first
+          true
+        else
+          false
+        end
       end
     end
   end

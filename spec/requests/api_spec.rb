@@ -1,13 +1,19 @@
 require "rails_helper"
 
 RSpec.describe "Users API", type: :request do
+  let(:api_tokens) { { "group1" => "12345abcde", "group2" => "other_token" } }
+
+  before do
+    allow(TradeTariffIdentity).to receive(:api_tokens).and_return(api_tokens)
+  end
+
   describe "GET /api/users/:id" do
     let(:user) { build(:user) }
     let(:headers) { { Authorization: "Bearer 12345abcde" } }
 
     context "when authenticated with a valid user" do
       before do
-        allow(User).to receive(:find).with(user.username).and_return(user)
+        allow(User).to receive(:find).with(user.username, "group1").and_return(user)
       end
 
       it "returns a successful response" do

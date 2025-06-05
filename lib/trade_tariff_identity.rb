@@ -18,6 +18,6 @@ module_function
   end
 
   def api_tokens
-    ENV["API_TOKENS"].to_s.split(",").map(&:strip)
+    JSON.parse(ENV.fetch("API_TOKENS", "{}"))
   end
 end

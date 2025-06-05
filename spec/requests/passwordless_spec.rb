@@ -13,6 +13,7 @@ RSpec.describe "Passwordless", type: :request do
     allow(TradeTariffIdentity).to receive(:cognito_client).and_return(cognito)
     allow(cognito).to receive(:admin_get_user).and_raise(Aws::CognitoIdentityProvider::Errors::UserNotFoundException.new(nil, "User not found"))
     allow(cognito).to receive(:admin_create_user)
+    allow(cognito).to receive(:admin_add_user_to_group)
     allow(cognito).to receive(:admin_initiate_auth).and_return(cognito_auth_object)
   end
 
@@ -25,6 +26,13 @@ RSpec.describe "Passwordless", type: :request do
     it "creates a new user if not found" do
       post passwordless_path, params: { email: }
       expect(cognito).to have_received(:admin_create_user)
+    end
+
+    it "adds the user to the consumer's group" do
+      post passwordless_path, params: { email: }
+      expect(cognito).to have_received(:admin_add_user_to_group).with(
+        hash_including(group_name: consumer.id),
+      )
     end
 
     it "initiates auth with auth params" do
