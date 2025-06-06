@@ -56,4 +56,38 @@ RSpec.describe "Users API", type: :request do
       end
     end
   end
+
+  describe "DELETE /api/users/:id" do
+    let(:headers) { { Authorization: "Bearer 12345abcde" } }
+    let(:username) { "test_user" }
+
+    context "when request is successful" do
+      before do
+        allow(User).to receive(:destroy).with(username, "group1").and_return(true)
+      end
+
+      it "returns a successful response" do
+        delete api_user_path(username), headers: headers
+        expect(response).to have_http_status(:success)
+      end
+    end
+
+    context "when request causes an error" do
+      before do
+        allow(User).to receive(:destroy).with(username, "group1").and_return(false)
+      end
+
+      it "returns an unsuccessful response" do
+        delete api_user_path(username), headers: headers
+        expect(response).to have_http_status(:internal_server_error)
+      end
+    end
+
+    describe "when not authenticated" do
+      it "returns an unauthorized response" do
+        delete api_user_path(username)
+        expect(response).to have_http_status(:unauthorized)
+      end
+    end
+  end
 end

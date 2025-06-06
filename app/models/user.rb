@@ -20,11 +20,39 @@ class User
       end
 
       email = user_response.user_attributes.find { |attr| attr.name == "email" }&.value
-      User.new(username: username, email: email)
+      User.new(username:, email:)
     rescue Aws::CognitoIdentityProvider::Errors::UserNotFoundException
       nil
     rescue Aws::CognitoIdentityProvider::Errors::ResourceNotFoundException
       nil
+    end
+  end
+
+  def self.destroy(username, group = nil)
+    client = TradeTariffIdentity.cognito_client
+
+    arguments = {
+      user_pool_id: TradeTariffIdentity.cognito_user_pool_id,
+      username: username,
+    }
+
+    begin
+      unless Rails.env.development?
+        client.admin_remove_user_from_group(
+          arguments.merge(group_name: group),
+        )
+      end
+
+      if client.admin_list_groups_for_user(arguments).groups.none?
+        client.admin_delete_user(arguments)
+      end
+
+      true
+    rescue Aws::CognitoIdentityProvider::Errors::UserNotFoundException
+      true
+    rescue Aws::CognitoIdentityProvider::Errors::ServiceError => e
+      Rails.logger.error("Failed to delete user: #{e.message}")
+      false
     end
   end
 
