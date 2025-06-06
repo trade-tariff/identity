@@ -6,7 +6,7 @@ Rails.application.routes.draw do
   get "healthcheckz" => "rails/health#show", as: :rails_health_check
 
   namespace :api, defaults: { format: 'json' } do
-    resources :users, only: %i[show]
+    resources :users, only: %i[show destroy]
   end
 
   resources :sessions, only: %i[index new]
