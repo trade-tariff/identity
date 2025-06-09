@@ -62,6 +62,11 @@ RSpec.describe "Passwordless", type: :request do
       post passwordless_path, params: { email: }
       expect(response).to redirect_to(login_path)
     end
+
+    it "Shows an error if the email is invalid" do
+      post passwordless_path, params: { email: "invalid_email" }
+      expect(response.body).to include("Enter an email address in the correct format, like name@example.com")
+    end
   end
 
   describe "GET /show" do

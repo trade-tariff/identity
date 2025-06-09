@@ -1,6 +1,12 @@
 class PasswordlessController < ApplicationController
   def create
-    email = params[:email]
+    @passwordless = PasswordlessForm.new(email: params[:email])
+
+    unless @passwordless.valid?
+      render "sessions/new" and return
+    end
+
+    email = @passwordless.email
 
     # try to create the user if they don’t exist
     begin
