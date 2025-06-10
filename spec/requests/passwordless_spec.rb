@@ -19,52 +19,52 @@ RSpec.describe "Passwordless", type: :request do
 
   describe "POST /create" do
     it "checks for an existing user" do
-      post passwordless_path, params: { email: }
+      post passwordless_path, params: { passwordless_form: { email: } }
       expect(cognito).to have_received(:admin_get_user)
     end
 
     it "creates a new user if not found" do
-      post passwordless_path, params: { email: }
+      post passwordless_path, params: { passwordless_form: { email: } }
       expect(cognito).to have_received(:admin_create_user)
     end
 
     it "adds the user to the consumer's group" do
-      post passwordless_path, params: { email: }
+      post passwordless_path, params: { passwordless_form: { email: } }
       expect(cognito).to have_received(:admin_add_user_to_group).with(
         hash_including(group_name: consumer.id),
       )
     end
 
     it "initiates auth with auth params" do
-      post passwordless_path, params: { email: }
+      post passwordless_path, params: { passwordless_form: { email: } }
       expect(cognito).to have_received(:admin_initiate_auth).with(
         hash_including(auth_parameters: hash_including("USERNAME" => email)),
       )
     end
 
     it "sets the session email" do
-      post passwordless_path, params: { email: }
+      post passwordless_path, params: { passwordless_form: { email: } }
       expect(session[:email]).to eq(email)
     end
 
     it "sets the session login" do
-      post passwordless_path, params: { email: }
+      post passwordless_path, params: { passwordless_form: { email: } }
       expect(session[:login]).to eq(cognito_auth_object.session)
     end
 
     it "redirects to passwordless_path" do
-      post passwordless_path, params: { email: }
+      post passwordless_path, params: { passwordless_form: { email: } }
       expect(response).to redirect_to(passwordless_path)
     end
 
     it "redirects to login_path on error" do
       allow(cognito).to receive(:admin_initiate_auth).and_raise(StandardError.new("Error"))
-      post passwordless_path, params: { email: }
+      post passwordless_path, params: { passwordless_form: { email: } }
       expect(response).to redirect_to(login_path)
     end
 
     it "Shows an error if the email is invalid" do
-      post passwordless_path, params: { email: "invalid_email" }
+      post passwordless_path, params: { passwordless_form: { email: "invalid_email" } }
       expect(response.body).to include("Enter an email address in the correct format, like name@example.com")
     end
   end
@@ -72,7 +72,7 @@ RSpec.describe "Passwordless", type: :request do
   describe "GET /show" do
     context "when email is in session" do
       before do
-        post passwordless_path, params: { email: }
+        post passwordless_path, params: { passwordless_form: { email: } }
       end
 
       it "returns a successful response" do
