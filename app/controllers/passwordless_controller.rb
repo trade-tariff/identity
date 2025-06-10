@@ -1,6 +1,6 @@
 class PasswordlessController < ApplicationController
   def create
-    @passwordless = PasswordlessForm.new(email: params[:email])
+    @passwordless = PasswordlessForm.new(permitted_params)
 
     unless @passwordless.valid?
       render "sessions/new" and return
@@ -96,6 +96,10 @@ class PasswordlessController < ApplicationController
   end
 
 private
+
+  def permitted_params
+    params.require(:passwordless_form).permit(:email)
+  end
 
   def client
     @client ||= TradeTariffIdentity.cognito_client
