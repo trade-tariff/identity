@@ -1,5 +1,5 @@
 module Api
-  class ApplicationController < ActionController::Base
+  class ApplicationController < ActionController::API
     include ActionController::HttpAuthentication::Token::ControllerMethods
 
     before_action :authenticate, unless: -> { Rails.env.development? }
