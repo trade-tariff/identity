@@ -12,6 +12,8 @@ gem "importmap-rails"
 gem "newrelic_rpm"
 gem "propshaft"
 gem "puma", ">= 5.0"
+gem "sidekiq"
+gem "sidekiq-scheduler"
 
 group :development, :test do
   gem "brakeman", require: false
