@@ -1,0 +1,9 @@
+:concurrency: 5
+:queues:
+  - default
+:scheduler:
+  :schedule:
+    RemoveUnverifiedUsersJob:
+      cron: "0 4 * * *" # Runs every day at 4AM
+      description: "Removes unverified users from Cognito"
+      class: RemoveUnverifiedUsersJob

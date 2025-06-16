@@ -3,7 +3,7 @@ require_relative "boot"
 require "rails"
 # Pick the frameworks you want:
 require "active_model/railtie"
-# require "active_job/railtie"
+require "active_job/railtie"
 # require "active_record/railtie"
 # require "active_storage/engine"
 require "action_controller/railtie"
@@ -38,5 +38,7 @@ module TradeTariffIdentity
     # config.time_zone = "Central Time (US & Canada)"
     # config.eager_load_paths << Rails.root.join("extras")
     config.exceptions_app = self.routes
+
+    config.active_job.queue_adapter = :sidekiq
   end
 end
