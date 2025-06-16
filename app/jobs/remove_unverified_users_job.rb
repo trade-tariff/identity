@@ -18,6 +18,15 @@ class RemoveUnverifiedUsersJob < ApplicationJob
 
         next if verified || created_at > 1.day.ago
 
+        groups_response = client.admin_list_groups_for_user({
+          user_pool_id:,
+          username: user.username,
+        })
+
+        in_myott_group = groups_response.groups.any? { |group| group.group_name == ENV["MYOTT_ID"] }
+
+        next unless in_myott_group
+
         client.admin_delete_user({
           user_pool_id:,
           username: user.username,
