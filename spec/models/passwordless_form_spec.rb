@@ -9,7 +9,7 @@ RSpec.describe PasswordlessForm, type: :model do
       end
 
       it "is invalid with an incorrectly formatted email" do
-        form = described_class.new(email: "invalid-email")
+        form = described_class.new(email: "invalid@email")
         expect(form).not_to be_valid
       end
 
