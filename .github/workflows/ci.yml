@@ -7,11 +7,6 @@ on:
   pull_request:
   workflow_dispatch:
 
-env:
-  AWS_REGION: eu-west-2
-  ENVIRONMENT: development
-  IAM_ROLE_ARN: arn:aws:iam::844815912454:role/GithubActions-ECS-Deployments-Role
-
 permissions:
   contents: read
   id-token: write
