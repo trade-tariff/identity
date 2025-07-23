@@ -92,7 +92,7 @@ RSpec.describe "Passwordless", type: :request do
   describe "GET /callback" do
     context "when link is correct and used in a timely manner" do
       let(:consumer) { build(:consumer) }
-      let(:authentication_result) { Struct.new(:id_token).new("id_token") }
+      let(:authentication_result) { Struct.new(:id_token, :refresh_token).new("id_token", "refresh_token") }
       let(:cognito_auth_object) { Struct.new(:authentication_result).new(authentication_result) }
 
       before do
@@ -121,6 +121,11 @@ RSpec.describe "Passwordless", type: :request do
       it "sets id_token cookie" do
         get callback_passwordless_path, params: { email:, token: "token" }
         expect(cookies["id_token"]).to be_a(String)
+      end
+
+      it "sets refresh_token cookie" do
+        get callback_passwordless_path, params: { email:, token: "token" }
+        expect(cookies["refresh_token"]).to eq "refresh_token"
       end
 
       it "redirects to the consumer's success URL" do
