@@ -1,4 +1,6 @@
 class PasswordlessController < ApplicationController
+  include TokenEncryption
+
   def create
     @passwordless = PasswordlessForm.new(permitted_params)
 
@@ -110,13 +112,5 @@ private
 
   def client
     @client ||= TradeTariffIdentity.cognito_client
-  end
-
-  def encrypted(token)
-    if Rails.env.development?
-      token
-    else
-      EncryptionService.encrypt_string(token)
-    end
   end
 end

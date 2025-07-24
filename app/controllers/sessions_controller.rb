@@ -1,4 +1,6 @@
 class SessionsController < ApplicationController
+  include TokenEncryption
+
   before_action :check_consumer
 
   def index
@@ -70,14 +72,6 @@ private
     rescue StandardError => e
       Rails.logger.error("Token refresh failed: #{e.message}")
       false
-    end
-  end
-
-  def encrypted(token)
-    if Rails.env.development?
-      token
-    else
-      EncryptionService.encrypt_string(token)
     end
   end
 end
