@@ -15,9 +15,9 @@ RSpec.describe CognitoTokenVerifier do
     end
 
     context "when the token is valid" do
-      it "returns the decoded token" do
+      it "returns :valid" do
         result = described_class.verify_id_token(token, consumer)
-        expect(result).to eq(decoded_token[0])
+        expect(result).to eq(:valid)
       end
 
       it "verifies the token" do
@@ -29,9 +29,9 @@ RSpec.describe CognitoTokenVerifier do
     context "when the token is valid but not in the expected group" do
       let(:decoded_token) { [{ "sub" => "1234567890", "email" => "test@example.com", "cognito:groups" => %w[other] }] }
 
-      it "returns nil" do
+      it "returns :invalid" do
         result = described_class.verify_id_token(token, consumer)
-        expect(result).to be_nil
+        expect(result).to eq :invalid
       end
     end
 
