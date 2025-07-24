@@ -1,4 +1,6 @@
 class PasswordlessController < ApplicationController
+  include TokenEncryption
+
   def create
     @passwordless = PasswordlessForm.new(permitted_params)
 
@@ -87,6 +89,13 @@ class PasswordlessController < ApplicationController
       expires: 1.day.from_now,
     }
 
+    cookies[:refresh_token] = {
+      value: result.authentication_result.refresh_token,
+      httponly: true,
+      domain: ".#{current_consumer.cookie_domain}",
+      expires: 30.days.from_now,
+    }
+
     redirect_to current_consumer.success_url, allow_other_host: true
   rescue Aws::CognitoIdentityProvider::Errors::NotAuthorizedException
     redirect_to current_consumer.failure_url, allow_other_host: true
@@ -103,13 +112,5 @@ private
 
   def client
     @client ||= TradeTariffIdentity.cognito_client
-  end
-
-  def encrypted(token)
-    if Rails.env.development?
-      token
-    else
-      EncryptionService.encrypt_string(token)
-    end
   end
 end
