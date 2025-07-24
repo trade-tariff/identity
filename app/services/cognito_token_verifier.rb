@@ -6,8 +6,7 @@ class CognitoTokenVerifier
     return :invalid if token.blank? || consumer.blank?
     return :invalid if jwks_keys.nil? && !Rails.env.development?
 
-    new(token, consumer).verify
-    :valid
+    new(token, consumer).verify ? :valid : :invalid
   rescue JWT::ExpiredSignature
     :expired
   rescue JWT::DecodeError
@@ -35,7 +34,7 @@ class CognitoTokenVerifier
 
   def decrypt
     unless Rails.env.development?
-      self.token = EncryptionService.decrypt_string(@encrypted_token)
+      self.token = EncryptionService.decrypt_string(token)
     end
     self
   end

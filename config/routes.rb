@@ -16,13 +16,14 @@ Rails.application.routes.draw do
 
   get "login", to: "sessions#new"
 
-  match "/400", to: "errors#bad_request", via: :all
-  match "/404", to: "errors#not_found", via: :all
-
   TradeTariffIdentity::CONSUMERS&.each do |consumer|
     consumer_id = consumer[:id]
     get consumer_id, to: "sessions#index", defaults: { consumer_id: }
   end
+
+  match "/400", to: "errors#bad_request", via: :all
+  match "/404", to: "errors#not_found", via: :all
+  match "/500", to: "errors#internal_server_error", via: :all
 
   root to: "sessions#index"
 end

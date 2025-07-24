@@ -3,7 +3,7 @@
 module TokenEncryption
   extend ActiveSupport::Concern
 
-  private
+private
 
   def encrypted(token)
     if Rails.env.development?
