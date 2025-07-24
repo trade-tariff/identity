@@ -1,4 +1,6 @@
 class SessionsController < ApplicationController
+  include TokenEncryption
+
   def index
     session[:consumer_id] = current_consumer.id
     redirect_to login_path
@@ -64,14 +66,6 @@ private
     rescue StandardError => e
       Rails.logger.error("Token refresh failed: #{e.message}")
       false
-    end
-  end
-
-  def encrypted(token)
-    if Rails.env.development?
-      token
-    else
-      EncryptionService.encrypt_string(token)
     end
   end
 end
