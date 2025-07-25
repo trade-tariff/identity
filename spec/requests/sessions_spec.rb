@@ -5,7 +5,7 @@ RSpec.describe "Sessions", type: :request do
     context "when consumer_id is not present" do
       it "causes an error" do
         get sessions_path
-        expect(response).to have_http_status(:bad_request)
+        expect(response).to redirect_to("/400")
       end
     end
 
@@ -32,7 +32,7 @@ RSpec.describe "Sessions", type: :request do
     context "when consumer_id is not present" do
       it "causes an error" do
         get sessions_path
-        expect(response).to have_http_status(:bad_request)
+        expect(response).to redirect_to("/400")
       end
     end
 

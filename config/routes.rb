@@ -18,7 +18,11 @@ Rails.application.routes.draw do
 
   match "/400", to: "errors#bad_request", via: :all
   match "/404", to: "errors#not_found", via: :all
-  match "*consumer_id", to: "sessions#index", via: :all
+
+  TradeTariffIdentity::CONSUMERS&.each do |consumer|
+    consumer_id = consumer[:id]
+    get consumer_id, to: "sessions#index", defaults: { consumer_id: }
+  end
 
   root to: "sessions#index"
 end
