@@ -4,13 +4,7 @@ class ApplicationController < ActionController::Base
   helper_method :current_consumer
 
   def current_consumer
-    @current_consumer ||= begin
-      consumer = Consumer.load(consumer_id)
-
-      raise ActionController::BadRequest unless consumer
-
-      consumer
-    end
+    @current_consumer ||= Consumer.load(consumer_id)
   end
 
 private

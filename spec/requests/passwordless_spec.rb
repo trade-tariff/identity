@@ -91,6 +91,7 @@ RSpec.describe "Passwordless", type: :request do
 
   describe "GET /callback" do
     context "when link is correct and used in a timely manner" do
+      let(:consumer) { build(:consumer) }
       let(:authentication_result) { Struct.new(:id_token).new("id_token") }
       let(:cognito_auth_object) { Struct.new(:authentication_result).new(authentication_result) }
 
@@ -102,7 +103,7 @@ RSpec.describe "Passwordless", type: :request do
       end
 
       it "sets the consumer id in session" do
-        allow(Consumer).to receive(:load).with("new_consumer")
+        allow(Consumer).to receive(:load).with("new_consumer").and_return(consumer)
         get callback_passwordless_path, params: { email:, token: "token", consumer: "new_consumer" }
         expect(session[:consumer_id]).to eq("new_consumer")
       end
