@@ -17,4 +17,13 @@ class ErrorsController < ApplicationController
       format.all { render status: :bad_request, plain: "Bad request" }
     end
   end
+
+  def internal_server_error
+    message = "We are experiencing technical difficulties".html_safe
+
+    respond_to do |format|
+      format.html { render "error", status: :internal_server_error, locals: { header: "Internal server error", message: } }
+      format.all { render status: :internal_server_error, plain: "Internal server error" }
+    end
+  end
 end

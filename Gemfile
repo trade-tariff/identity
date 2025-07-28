@@ -6,9 +6,11 @@ gem "rails", "~> 8.0.2"
 
 gem "aws-sdk-cognitoidentityprovider"
 gem "bootsnap", require: false
+gem "faraday"
 gem "govuk-components"
 gem "govuk_design_system_formbuilder"
 gem "importmap-rails"
+gem "jwt"
 gem "newrelic_rpm"
 gem "propshaft"
 gem "puma", ">= 5.0"
