@@ -53,13 +53,13 @@ RSpec.describe "Sessions", type: :request do
       end
 
       it "redirects to the consumer's success URL when session is valid" do
-        allow(CognitoTokenVerifier).to receive(:verify_id_token).and_return(:valid)
+        allow(CognitoTokenVerifier).to receive(:call).and_return(:valid)
         get new_session_path, params: { consumer_id: consumer.id }
         expect(response).to redirect_to(success_url)
       end
 
       it "refreshes the session and redirects to the consumer's success URL when existing session is expired" do
-        allow(CognitoTokenVerifier).to receive(:verify_id_token).and_return(:expired)
+        allow(CognitoTokenVerifier).to receive(:call).and_return(:expired)
         get new_session_path, params: { consumer_id: consumer.id }
         expect(response).to redirect_to(success_url)
       end

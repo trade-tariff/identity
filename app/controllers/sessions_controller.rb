@@ -23,7 +23,7 @@ private
   end
 
   def check_session
-    case CognitoTokenVerifier.verify_id_token(cookies[:id_token], current_consumer)
+    case CognitoTokenVerifier.call(cookies[:id_token], current_consumer)
     when :valid
       redirect_to current_consumer.success_url, allow_other_host: true and return
     when :expired
