@@ -1,7 +1,7 @@
 require "rails_helper"
 
 RSpec.describe CognitoTokenVerifier do
-  describe ".verify_id_token" do
+  describe ".call" do
     let(:token) { "test-token" }
     let(:consumer) { build(:consumer, id: "myott") }
     let(:jwks_url) { "https://cognito-idp.#{ENV['AWS_REGION']}.amazonaws.com/#{ENV['COGNITO_USER_POOL_ID']}/.well-known/jwks.json" }
@@ -16,12 +16,12 @@ RSpec.describe CognitoTokenVerifier do
 
     context "when the token is valid" do
       it "returns :valid" do
-        result = described_class.verify_id_token(token, consumer)
+        result = described_class.call(token, consumer)
         expect(result).to eq(:valid)
       end
 
       it "verifies the token" do
-        described_class.verify_id_token(token, consumer)
+        described_class.call(token, consumer)
         expect(JWT).to have_received(:decode).with(token, nil, true, algorithms: %w[RS256], jwks: hash_including(:keys), iss: anything, verify_iss: true)
       end
     end
@@ -30,7 +30,7 @@ RSpec.describe CognitoTokenVerifier do
       let(:decoded_token) { [{ "sub" => "1234567890", "email" => "test@example.com", "cognito:groups" => %w[other] }] }
 
       it "returns :invalid" do
-        result = described_class.verify_id_token(token, consumer)
+        result = described_class.call(token, consumer)
         expect(result).to eq :invalid
       end
     end
@@ -39,7 +39,7 @@ RSpec.describe CognitoTokenVerifier do
       let(:token) { nil }
 
       it "returns :invalid" do
-        result = described_class.verify_id_token(token, consumer)
+        result = described_class.call(token, consumer)
         expect(result).to eq(:invalid)
       end
     end
@@ -50,7 +50,7 @@ RSpec.describe CognitoTokenVerifier do
       end
 
       it "returns :invalid" do
-        result = described_class.verify_id_token(token, consumer)
+        result = described_class.call(token, consumer)
         expect(result).to eq(:invalid)
       end
     end
@@ -61,7 +61,7 @@ RSpec.describe CognitoTokenVerifier do
       end
 
       it "returns :invalid" do
-        result = described_class.verify_id_token(token, consumer)
+        result = described_class.call(token, consumer)
         expect(result).to eq(:invalid)
       end
     end
@@ -72,7 +72,7 @@ RSpec.describe CognitoTokenVerifier do
       end
 
       it "returns :expired" do
-        result = described_class.verify_id_token(token, consumer)
+        result = described_class.call(token, consumer)
         expect(result).to eq(:expired)
       end
     end
