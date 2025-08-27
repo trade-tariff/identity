@@ -17,6 +17,10 @@ module_function
     ENV["ENCRYPTION_SECRET"]
   end
 
+  def cookie_domain
+    ENV["MYOTT_COOKIE_DOMAIN"]
+  end
+
   def api_tokens
     JSON.parse(ENV.fetch("API_TOKENS", "{}"))
   end
