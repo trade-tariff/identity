@@ -3,19 +3,16 @@ development:
   - id: myott
     success_url: http://localhost:3001/subscriptions
     failure_url: http://localhost:3001/subscriptions/invalid
-    cookie_domain: localhost
     methods:
       - :passwordless
   - id: portal
     success_url: http://localhost:3000/
     failure_url: http://localhost:3000/users/invalid
-    cookie_domain: localhost
     methods:
       - :passwordless
   - id: admin
     success_url: http://localhost:3003/
     failure_url: http://localhost:3003/users/invalid
-    cookie_domain: localhost
     methods:
       - :passwordless
 
