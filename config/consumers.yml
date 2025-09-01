@@ -3,7 +3,16 @@ development:
   - id: myott
     success_url: http://localhost:3001/subscriptions
     failure_url: http://localhost:3001/subscriptions/invalid
-    cookie_domain: localhost
+    methods:
+      - :passwordless
+  - id: portal
+    success_url: http://localhost:3000/
+    failure_url: http://localhost:3000/users/invalid
+    methods:
+      - :passwordless
+  - id: admin
+    success_url: http://localhost:3003/
+    failure_url: http://localhost:3003/users/invalid
     methods:
       - :passwordless
 
@@ -11,6 +20,15 @@ production:
   - id: <%= ENV.fetch("MYOTT_ID", "") %>
     success_url: <%= URI.join(ENV.fetch("MYOTT_BASE_URL", "https://www.trade-tariff.service.gov.uk"), "/subscriptions").to_s %>
     failure_url: <%= URI.join(ENV.fetch("MYOTT_BASE_URL", "https://www.trade-tariff.service.gov.uk"), "/subscriptions/invalid").to_s %>
-    cookie_domain: <%= ENV.fetch("MYOTT_COOKIE_DOMAIN", "") %>
+    methods:
+      - :passwordless
+  - id: portal
+    success_url: <%= URI.join("hub", ENV["MYOTT_BASE_URL"].sub("www.", ""), "/").to_s %>
+    failure_url: <%= URI.join("hub", ENV["MYOTT_BASE_URL"].sub("www.", ""), "/users/invalid").to_s %>
+    methods:
+      - :passwordless
+  - id: admin
+    success_url: <%= URI.join("admin", ENV["MYOTT_BASE_URL"].sub("www.", ""), "/").to_s %>
+    failure_url: <%= URI.join("admin", ENV["MYOTT_BASE_URL"].sub("www.", ""), "/users/invalid").to_s %>
     methods:
       - :passwordless
