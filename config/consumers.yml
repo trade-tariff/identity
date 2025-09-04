@@ -1,34 +1,34 @@
 # MyOTT Subscriptions
 development:
   - id: myott
-    success_url: http://localhost:3001/subscriptions
-    failure_url: http://localhost:3001/subscriptions/invalid
+    success_url: <%= URI.join(ENV["MYOTT_URL"], "/subscriptions").to_s %>
+    failure_url: <%= URI.join(ENV["MYOTT_URL"], "/subscriptions/invalid").to_s %>
     methods:
       - :passwordless
   - id: portal
-    success_url: http://localhost:3000/
-    failure_url: http://localhost:3000/users/invalid
+    success_url: <%= ENV["PORTAL_URL"].to_s %>
+    failure_url: <%= URI.join(ENV["PORTAL_URL"], "/users/invalid").to_s %>
     methods:
       - :passwordless
   - id: admin
-    success_url: http://localhost:3003/
-    failure_url: http://localhost:3003/users/invalid
+    success_url: <%= ENV["ADMIN_URL"].to_s %>
+    failure_url: <%= URI.join(ENV["ADMIN_URL"], "/users/invalid").to_s %>
     methods:
       - :passwordless
 
 production:
   - id: <%= ENV.fetch("MYOTT_ID", "") %>
-    success_url: <%= URI.join(ENV.fetch("MYOTT_BASE_URL", "https://www.trade-tariff.service.gov.uk"), "/subscriptions").to_s %>
-    failure_url: <%= URI.join(ENV.fetch("MYOTT_BASE_URL", "https://www.trade-tariff.service.gov.uk"), "/subscriptions/invalid").to_s %>
+    success_url: <%= URI.join(ENV["MYOTT_URL"], "/subscriptions").to_s %>
+    failure_url: <%= URI.join(ENV["MYOTT_URL"], "/subscriptions/invalid").to_s %>
     methods:
       - :passwordless
   - id: portal
-    success_url: <%= URI.join("hub", ENV.fetch("MYOTT_BASE_URL", "https://www.trade-tariff.service.gov.uk").sub("www.", ""), "/").to_s %>
-    failure_url: <%= URI.join("hub", ENV.fetch("MYOTT_BASE_URL", "https://www.trade-tariff.service.gov.uk").sub("www.", ""), "/users/invalid").to_s %>
+    success_url: <%= ENV["PORTAL_URL"] %>
+    failure_url: <%= URI.join(ENV["PORTAL_URL"], "/users/invalid").to_s %>
     methods:
       - :passwordless
   - id: admin
-    success_url: <%= URI.join("admin", ENV.fetch("MYOTT_BASE_URL", "https://www.trade-tariff.service.gov.uk").sub("www.", ""), "/").to_s %>
-    failure_url: <%= URI.join("admin", ENV.fetch("MYOTT_BASE_URL", "https://www.trade-tariff.service.gov.uk").sub("www.", ""), "/users/invalid").to_s %>
+    success_url: <%= ENV["ADMIN_URL"].to_s %>
+    failure_url: <%= URI.join(ENV["ADMIN_URL"], "/users/invalid").to_s %>
     methods:
       - :passwordless

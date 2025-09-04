@@ -14,7 +14,7 @@ class Consumer
         methods: consumer_attributes[:methods],
         success_url: consumer_attributes[:success_url],
         failure_url: consumer_attributes[:failure_url],
-        cookie_domain: consumer_attributes[:cookie_domain])
+        cookie_domain: TradeTariffIdentity.cookie_domain)
   end
 
   attr_accessor :id, :methods, :success_url, :failure_url, :cookie_domain
