@@ -23,12 +23,12 @@ production:
     methods:
       - :passwordless
   - id: portal
-    success_url: <%= URI.join("hub", ENV["MYOTT_BASE_URL"].sub("www.", ""), "/").to_s %>
-    failure_url: <%= URI.join("hub", ENV["MYOTT_BASE_URL"].sub("www.", ""), "/users/invalid").to_s %>
+    success_url: <%= URI.join("hub", ENV.fetch("MYOTT_BASE_URL", "https://www.trade-tariff.service.gov.uk").sub("www.", ""), "/").to_s %>
+    failure_url: <%= URI.join("hub", ENV.fetch("MYOTT_BASE_URL", "https://www.trade-tariff.service.gov.uk").sub("www.", ""), "/users/invalid").to_s %>
     methods:
       - :passwordless
   - id: admin
-    success_url: <%= URI.join("admin", ENV["MYOTT_BASE_URL"].sub("www.", ""), "/").to_s %>
-    failure_url: <%= URI.join("admin", ENV["MYOTT_BASE_URL"].sub("www.", ""), "/users/invalid").to_s %>
+    success_url: <%= URI.join("admin", ENV.fetch("MYOTT_BASE_URL", "https://www.trade-tariff.service.gov.uk").sub("www.", ""), "/").to_s %>
+    failure_url: <%= URI.join("admin", ENV.fetch("MYOTT_BASE_URL", "https://www.trade-tariff.service.gov.uk").sub("www.", ""), "/users/invalid").to_s %>
     methods:
       - :passwordless
