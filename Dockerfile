@@ -21,10 +21,14 @@ RUN bundle install --jobs=4 --no-binstubs
 # Copy all files to /app (except what is defined in .dockerignore)
 COPY . /app/
 
-RUN RAILS_ENV=production SECRET_KEY_BASE=secret bundle exec rails assets:precompile
+RUN \
+  ADMIN_URL=http://localhost:3003 \
+  MYOTT_URL=http://localhost:3001 \
+  PORTAL_URL=http://localhost:3004 \
+  bundle exec rails assets:precompile
 
-# Cleanup to save space in the production image
-RUN rm -rf node_modules log tmp && \
+  # Cleanup to save space in the production image
+  RUN rm -rf node_modules log tmp && \
   rm -rf /usr/local/bundle/cache && \
   rm -rf .env && \
   find /usr/local/bundle/gems -name "*.c" -delete && \
