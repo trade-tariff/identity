@@ -51,16 +51,18 @@ private
       cookies[:id_token] = {
         value: encrypted(response.authentication_result.id_token),
         httponly: true,
-        domain: ".#{current_consumer.cookie_domain}",
+        domain: current_consumer.cookie_domain,
         expires: 1.day.from_now,
+        secure: Rails.env.production?,
       }
 
       if response.authentication_result.refresh_token.present?
         cookies[:refresh_token] = {
           value: response.authentication_result.refresh_token,
           httponly: true,
-          domain: ".#{current_consumer.cookie_domain}",
+          domain: current_consumer.cookie_domain,
           expires: 30.days.from_now,
+          secure: Rails.env.production?,
         }
       end
 
