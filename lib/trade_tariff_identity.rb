@@ -18,7 +18,9 @@ module_function
   end
 
   def cookie_domain
-    ENV["MYOTT_COOKIE_DOMAIN"]
+    return :all if Rails.env.development?
+
+    ".#{ENV['MYOTT_COOKIE_DOMAIN']}"
   end
 
   def api_tokens
