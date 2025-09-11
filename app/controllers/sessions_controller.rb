@@ -53,7 +53,6 @@ private
         httponly: true,
         domain: current_consumer.cookie_domain,
         expires: 1.day.from_now,
-        secure: Rails.env.production?,
       }
 
       if response.authentication_result.refresh_token.present?
@@ -62,7 +61,6 @@ private
           httponly: true,
           domain: current_consumer.cookie_domain,
           expires: 30.days.from_now,
-          secure: Rails.env.production?,
         }
       end
 

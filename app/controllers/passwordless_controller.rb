@@ -87,7 +87,6 @@ class PasswordlessController < ApplicationController
       httponly: true,
       domain: current_consumer.cookie_domain,
       expires: 1.day.from_now,
-      secure: Rails.env.production?,
     }
 
     cookies[:refresh_token] = {
@@ -95,7 +94,6 @@ class PasswordlessController < ApplicationController
       httponly: true,
       domain: current_consumer.cookie_domain,
       expires: 30.days.from_now,
-      secure: Rails.env.production?,
     }
 
     redirect_to current_consumer.success_url, allow_other_host: true
