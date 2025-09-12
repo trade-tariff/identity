@@ -23,12 +23,12 @@ production:
     methods:
       - :passwordless
   - id: portal
-    success_url: <%= ENV["PORTAL_URL"] %>
-    failure_url: <%= URI.join(ENV["PORTAL_URL"], "/users/invalid").to_s %>
+    success_url: <%= URI.join(ENV["PORTAL_URL"], "/auth/redirect") %>
+    failure_url: <%= URI.join(ENV["PORTAL_URL"], "/auth/invalid").to_s %>
     methods:
       - :passwordless
   - id: admin
-    success_url: <%= ENV["ADMIN_URL"].to_s %>
-    failure_url: <%= URI.join(ENV["ADMIN_URL"], "/users/invalid").to_s %>
+    success_url: <%= URI.join(ENV["ADMIN_URL"], "/auth/redirect") %>
+    failure_url: <%= URI.join(ENV["ADMIN_URL"], "/auth/invalid").to_s %>
     methods:
       - :passwordless
