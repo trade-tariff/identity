@@ -1,34 +1,26 @@
-# MyOTT Subscriptions
-development:
-  - id: myott
-    success_url: <%= URI.join(ENV["MYOTT_URL"], "/subscriptions").to_s %>
-    failure_url: <%= URI.join(ENV["MYOTT_URL"], "/subscriptions/invalid").to_s %>
-    methods:
-      - :passwordless
-  - id: portal
-    success_url: <%= ENV["PORTAL_URL"].to_s %>
-    failure_url: <%= URI.join(ENV["PORTAL_URL"], "/users/invalid").to_s %>
-    methods:
-      - :passwordless
-  - id: admin
-    success_url: <%= ENV["ADMIN_URL"].to_s %>
-    failure_url: <%= URI.join(ENV["ADMIN_URL"], "/users/invalid").to_s %>
-    methods:
-      - :passwordless
+admin_config: &admin_config
+  id: admin
+  methods:
+    - :passwordless
+  success_url: <%= URI.join(ENV["ADMIN_URL"], "/auth/redirect") %>
+  failure_url: <%= URI.join(ENV["ADMIN_URL"], "/auth/invalid") %>
+portal_config: &portal_config
+  id: portal
+  methods:
+    - :passwordless
+  success_url: <%= URI.join(ENV["PORTAL_URL"], "/auth/redirect") %>
+  failure_url: <%= URI.join(ENV["PORTAL_URL"], "/auth/invalid") %>
+myott_config: &myott_config
+  id: myott
+  methods:
+    - :passwordless
+  success_url: <%= URI.join(ENV["MYOTT_URL"], "/subscriptions").to_s %>
+  failure_url: <%= URI.join(ENV["MYOTT_URL"], "/subscriptions/invalid").to_s %>
 
-production:
-  - id: <%= ENV.fetch("MYOTT_ID", "") %>
-    success_url: <%= URI.join(ENV["MYOTT_URL"], "/subscriptions").to_s %>
-    failure_url: <%= URI.join(ENV["MYOTT_URL"], "/subscriptions/invalid").to_s %>
-    methods:
-      - :passwordless
-  - id: portal
-    success_url: <%= URI.join(ENV["PORTAL_URL"], "/auth/redirect") %>
-    failure_url: <%= URI.join(ENV["PORTAL_URL"], "/auth/invalid").to_s %>
-    methods:
-      - :passwordless
-  - id: admin
-    success_url: <%= URI.join(ENV["ADMIN_URL"], "/auth/redirect") %>
-    failure_url: <%= URI.join(ENV["ADMIN_URL"], "/auth/invalid").to_s %>
-    methods:
-      - :passwordless
+default_config: &default_config
+  - <<: *myott_config
+  - <<: *portal_config
+  - <<: *admin_config
+
+development: *default_config
+production: *default_config
