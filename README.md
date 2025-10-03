@@ -23,13 +23,6 @@ AWS_SECRET_ACCESS_KEY
 AWS_SESSION_TOKEN
 ```
 
-As an alternative to using the AWS vars above,
-you can login and set the AWS_PROFILE env var
-
-``` sh
-aws sso login --profile [profile name]
-```
-
 ###
 
 Start the app with
