@@ -32,3 +32,8 @@ group :test do
   gem "factory_bot_rails"
   gem "rspec-rails"
 end
+
+group :production do
+  gem "lograge"
+  gem "logstash-event"
+end
