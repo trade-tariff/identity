@@ -17,7 +17,15 @@ common: &default_settings
   app_name: "identity"
 
   distributed_tracing:
+    enabled: false
+
+  # Transaction tracing settings for slow requests and errors
+  transaction_tracer:
     enabled: true
+    transaction_threshold: <%= ENV['NEW_RELIC_TRANSACTION_THRESHOLD'] || 0.100 %>
+    record_sql: obfuscated
+  span_events:
+    enabled: false
 
   # To disable the agent regardless of other settings, uncomment the following:
   # agent_enabled: false
