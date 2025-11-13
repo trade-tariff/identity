@@ -102,12 +102,6 @@ RSpec.describe "Passwordless", type: :request do
         allow(cognito).to receive(:admin_update_user_attributes)
       end
 
-      it "sets the consumer id in session" do
-        allow(Consumer).to receive(:load).with("new_consumer").and_return(consumer)
-        get callback_passwordless_path, params: { email:, token: "token", consumer: "new_consumer" }
-        expect(session[:consumer_id]).to eq("new_consumer")
-      end
-
       it "responds to auth challenge" do
         get callback_passwordless_path, params: { email:, token: "token" }
         expect(cognito).to have_received(:respond_to_auth_challenge)
@@ -147,6 +141,17 @@ RSpec.describe "Passwordless", type: :request do
         allow(cognito).to receive(:respond_to_auth_challenge).and_raise(StandardError.new("Error"))
         get callback_passwordless_path, params: { email:, token: "token" }
         expect(response).to redirect_to(consumer.failure_url)
+      end
+    end
+
+    context "when no consumer is found" do
+      it "renders the invalid page", :aggregate_failures do
+        allow(Consumer).to receive(:load).with(consumer.id).and_return(nil)
+        get callback_passwordless_path, params: { email:, token: "token" }
+
+        expect(response).to have_http_status(:ok)
+        expect(response.body).to include("Verification link invalid")
+        expect(response.body).to include("the verification link has expired")
       end
     end
   end
