@@ -12,6 +12,7 @@ Rails.application.routes.draw do
   resources :sessions, only: %i[index new]
   resource :passwordless, only: %i[create show], controller: :passwordless do
     get "callback", on: :member
+    get "invalid", on: :member
   end
 
   get "login", to: "sessions#new"
