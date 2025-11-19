@@ -5,6 +5,7 @@ class SessionsController < ApplicationController
 
   def index
     session[:consumer_id] = current_consumer.id
+    store_state(params[:state])
     redirect_to login_path
   end
 
@@ -68,5 +69,10 @@ private
 
   def refresh_token_cookie_name
     TradeTariffIdentity.refresh_token_cookie_name
+  end
+
+  def store_state(value)
+    redis_key = session.id # TODO: is this enough?
+    Rails.cache.write(redis_key, value)
   end
 end

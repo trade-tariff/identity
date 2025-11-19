@@ -47,4 +47,12 @@ module TradeTariffIdentity
       JSON.parse(ENV.fetch("API_TOKENS", "{}"))
     end
   end
+
+  def redis_config
+    { url: ENV["REDIS_URL"], db: 0, id: nil }
+  end
+
+  def redis
+    @redis ||= Redis.new(redis_config)
+  end
 end
