@@ -270,6 +270,8 @@ GEM
       erb
       psych (>= 4.0.0)
       tsort
+    redis (5.4.1)
+      redis-client (>= 0.22.0)
     redis-client (0.26.1)
       connection_pool
     regexp_parser (2.11.3)
@@ -398,6 +400,7 @@ DEPENDENCIES
   propshaft
   puma (>= 5.0)
   rails (~> 8.0.3)
+  redis (~> 5.4)
   rspec-rails
   rubocop-govuk
   sidekiq
@@ -405,7 +408,7 @@ DEPENDENCIES
   web-console
 
 RUBY VERSION
-   ruby 3.4.4p34
+   ruby 3.4.7p58
 
 BUNDLED WITH
-   2.6.8
+   2.7.2

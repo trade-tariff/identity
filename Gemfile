@@ -37,3 +37,5 @@ group :production do
   gem "lograge"
   gem "logstash-event"
 end
+
+gem "redis", "~> 5.4"
