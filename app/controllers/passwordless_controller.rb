@@ -95,7 +95,7 @@ class PasswordlessController < ApplicationController
       expires: 30.days.from_now,
     }
 
-    redirect_to current_consumer.success_url, allow_other_host: true
+    redirect_to "#{current_consumer.success_url}?state=#{retrieve_state}", allow_other_host: true
   rescue Aws::CognitoIdentityProvider::Errors::NotAuthorizedException
     redirect_to current_consumer.failure_url, allow_other_host: true
   rescue StandardError => e
@@ -111,5 +111,13 @@ private
 
   def client
     @client ||= TradeTariffIdentity.cognito_client
+  end
+
+  def retrieve_state
+    @retrieve_state ||= Rails.cache.read(session.id)
+  end
+
+  def clear_cached_state
+    Rails.cache.delete(session.id)
   end
 end
