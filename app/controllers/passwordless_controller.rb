@@ -57,12 +57,11 @@ class PasswordlessController < ApplicationController
 
   def callback
     email = params[:email]
-    consumer_id = params[:consumer]
     token = params[:token]
     auth = session[:login]
 
-    if consumer_id.present?
-      session[:consumer_id] = consumer_id
+    if current_consumer.nil?
+      render :invalid and return
     end
 
     result = client.respond_to_auth_challenge(

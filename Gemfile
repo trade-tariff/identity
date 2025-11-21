@@ -2,7 +2,7 @@ source "https://rubygems.org"
 
 ruby file: ".ruby-version"
 
-gem "rails", "~> 8.0.3"
+gem "rails", "~> 8.1.1"
 
 gem "aws-sdk-cognitoidentityprovider"
 gem "bootsnap", require: false
