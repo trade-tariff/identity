@@ -55,4 +55,10 @@ module TradeTariffIdentity
   def redis
     @redis ||= Redis.new(redis_config)
   end
+
+  def url_with_params(url, state)
+    uri = URI.parse(url)
+    uri.query = URI.encode_www_form({ "state" => state })
+    uri.to_s
+  end
 end

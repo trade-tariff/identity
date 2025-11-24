@@ -10,6 +10,8 @@ class PasswordlessController < ApplicationController
 
     email = @passwordless.email
 
+    Rails.cache.write(email, session[:state])
+
     # try to create the user if they don’t exist
     begin
       client.admin_get_user(
@@ -83,7 +85,14 @@ class PasswordlessController < ApplicationController
 
     set_cookies(response.authentication_result)
 
-    redirect_to "#{current_consumer.success_url}?state=#{retrieve_state}", allow_other_host: true
+    state = Rails.cache.read(email)
+
+    if state.nil?
+      redirect_to TradeTariffIdentity.url_with_params(current_consumer.success_url, session[:state]), allow_other_host: true
+    else
+      redirect_to current_consumer.stateful_success_url(state), allow_other_host: true
+      Rails.cache.delete(email)
+    end
   rescue Aws::CognitoIdentityProvider::Errors::NotAuthorizedException
     redirect_to current_consumer.failure_url, allow_other_host: true
   rescue StandardError => e
@@ -107,13 +116,5 @@ private
 
   def client
     @client ||= TradeTariffIdentity.cognito_client
-  end
-
-  def retrieve_state
-    @retrieve_state ||= Rails.cache.read(session.id)
-  end
-
-  def clear_cached_state
-    Rails.cache.delete(session.id)
   end
 end
