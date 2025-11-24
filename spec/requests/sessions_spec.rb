@@ -39,6 +39,19 @@ RSpec.describe "Sessions", type: :request do
         expect(session[:consumer_id]).to eq(consumer.id)
       end
     end
+
+    context "when a state parameter is supplied" do
+      let(:consumer) { build(:consumer) }
+
+      before do
+        allow(Consumer).to receive(:load).with(consumer.id).and_return(consumer)
+      end
+
+      it "sets the state parameter in the session" do
+        get sessions_path, params: { consumer_id: consumer.id, state: "abcdef0123456789" }
+        expect(session[:state]).to eq("abcdef0123456789")
+      end
+    end
   end
 
   describe "GET /new" do
@@ -69,6 +82,13 @@ RSpec.describe "Sessions", type: :request do
         allow(CognitoTokenVerifier).to receive(:call).and_return(:valid)
         get new_session_path, params: { consumer_id: consumer.id }
         expect(response).to redirect_to(success_url)
+      end
+
+      it "appends the original state parameter, if present" do
+        get sessions_path, params: { consumer_id: consumer.id, state: "abcdef0123456789" }
+        allow(CognitoTokenVerifier).to receive(:call).and_return(:valid)
+        get new_session_path, params: { consumer_id: consumer.id }
+        expect(response).to redirect_to("#{success_url}?state=abcdef0123456789")
       end
 
       it "refreshes the session and redirects to the consumer's success URL when existing session is expired" do
