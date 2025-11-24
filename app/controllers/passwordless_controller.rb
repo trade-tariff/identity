@@ -88,9 +88,9 @@ class PasswordlessController < ApplicationController
     state = Rails.cache.read(email)
 
     if state.nil?
-      redirect_to TradeTariffIdentity.url_with_params(current_consumer.success_url, session[:state]), allow_other_host: true
+      redirect_to current_consumer.success_url, allow_other_host: true
     else
-      redirect_to current_consumer.stateful_success_url(state), allow_other_host: true
+      redirect_to TradeTariffIdentity.url_with_params(current_consumer.success_url, state), allow_other_host: true
       Rails.cache.delete(email)
     end
   rescue Aws::CognitoIdentityProvider::Errors::NotAuthorizedException
