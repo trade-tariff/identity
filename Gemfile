@@ -14,6 +14,7 @@ gem "jwt"
 gem "newrelic_rpm"
 gem "propshaft"
 gem "puma", ">= 5.0"
+gem "redis"
 gem "sidekiq"
 gem "sidekiq-scheduler"
 
