@@ -36,7 +36,8 @@ Rails.application.configure do
   config.lograge.enabled = true
   config.lograge.formatter = Lograge::Formatters::Logstash.new
   config.lograge.ignore_actions = [
-    'Rails::HealthController#show',
+    "HealthcheckController#check",
+    "HealthcheckController#checkz"
   ]
   config.lograge.custom_options = lambda do |_event|
     { domain: ENV['GOVUK_APP_DOMAIN'] }

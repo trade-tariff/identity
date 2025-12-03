@@ -1,5 +1,6 @@
 Rails.application.routes.draw do
-  get "healthcheckz" => "rails/health#show", as: :rails_health_check
+  get "/healthcheck", to: "healthcheck#check"
+  get "/healthcheckz", to: "healthcheck#checkz"
 
   namespace :api, defaults: { format: 'json' } do
     resources :users, only: %i[show destroy]
