@@ -1,5 +1,5 @@
 module "service" {
-  source = "git@github.com:trade-tariff/trade-tariff-platform-terraform-modules.git//aws/ecs-service?ref=aws/ecs-service-v1.17.0"
+  source = "git@github.com:trade-tariff/trade-tariff-platform-terraform-modules.git//aws/ecs-service?ref=aws/ecs-service-v1.18.2"
 
   region = var.region
 
@@ -27,7 +27,8 @@ module "service" {
 
   enable_ecs_exec = true
 
-  has_autoscaler = local.has_autoscaler
-  min_capacity   = var.min_capacity
-  max_capacity   = var.max_capacity
+  has_autoscaler      = local.has_autoscaler
+  min_capacity        = var.min_capacity
+  max_capacity        = var.max_capacity
+  autoscaling_metrics = var.autoscaling_metrics
 }
