@@ -26,4 +26,18 @@ module_function
   def api_tokens
     JSON.parse(ENV.fetch("API_TOKENS", "{}"))
   end
+
+  def redis_config
+    { url: ENV["REDIS_URL"], db: 0, id: nil }
+  end
+
+  def redis
+    @redis ||= Redis.new(redis_config)
+  end
+
+  def url_with_params(url, state)
+    uri = URI.parse(url)
+    uri.query = URI.encode_www_form({ "state" => state })
+    uri.to_s
+  end
 end
