@@ -11,6 +11,7 @@ RSpec.describe "Sessions", type: :request do
 
     context "when valid consumer_id is present" do
       let(:consumer) { build(:consumer) }
+      let(:stale_consumer) { build(:consumer, id: "stale-consumer") }
 
       before do
         allow(Consumer).to receive(:load).with(consumer.id).and_return(consumer)
@@ -22,6 +23,18 @@ RSpec.describe "Sessions", type: :request do
       end
 
       it "sets the consumer_id in the session" do
+        get sessions_path, params: { consumer_id: consumer.id }
+        expect(session[:consumer_id]).to eq(consumer.id)
+      end
+
+      it "prioritizes params consumer_id over session consumer_id", :aggregate_failures do
+        allow(Consumer).to receive(:load).with(stale_consumer.id).and_return(stale_consumer)
+
+        # First request sets session to stale consumer
+        get sessions_path, params: { consumer_id: stale_consumer.id }
+        expect(session[:consumer_id]).to eq(stale_consumer.id)
+
+        # Second request with different params should override session
         get sessions_path, params: { consumer_id: consumer.id }
         expect(session[:consumer_id]).to eq(consumer.id)
       end
