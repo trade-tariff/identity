@@ -10,6 +10,6 @@ class ApplicationController < ActionController::Base
 private
 
   def consumer_id
-    session[:consumer_id] || params[:consumer_id]
+    params[:consumer_id] || session[:consumer_id]
   end
 end
