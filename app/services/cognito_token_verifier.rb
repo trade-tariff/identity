@@ -19,7 +19,7 @@ class CognitoTokenVerifier
     user_in_authorized_group?(decoded_token) ? :valid : :invalid
   rescue JWT::ExpiredSignature
     :expired
-  rescue JWT::DecodeError
+  rescue JWT::DecodeError, ActiveSupport::MessageEncryptor::InvalidMessage
     :invalid
   end
 
