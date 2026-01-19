@@ -76,5 +76,16 @@ RSpec.describe CognitoTokenVerifier do
         expect(result).to eq(:expired)
       end
     end
+
+    context "when the token cannot be decrypted" do
+      before do
+        allow(EncryptionService).to receive(:decrypt_string).and_raise(ActiveSupport::MessageEncryptor::InvalidMessage)
+      end
+
+      it "returns :invalid" do
+        result = described_class.call(token, consumer)
+        expect(result).to eq(:invalid)
+      end
+    end
   end
 end
