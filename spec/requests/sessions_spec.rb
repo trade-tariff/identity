@@ -83,6 +83,14 @@ RSpec.describe "Sessions", type: :request do
         get new_session_path, params: { consumer_id: consumer.id }
         expect(response).to have_http_status(:ok)
       end
+
+      it "clears cookies and renders login when session is invalid", :aggregate_failures do
+        allow(CognitoTokenVerifier).to receive(:call).and_return(:invalid)
+        get new_session_path, params: { consumer_id: consumer.id }
+        expect(response).to have_http_status(:ok)
+        expect(cookies[:id_token]).to be_blank
+        expect(cookies[:refresh_token]).to be_blank
+      end
     end
   end
 end
