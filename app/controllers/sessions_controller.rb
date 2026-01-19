@@ -30,6 +30,8 @@ private
       if refresh_session_with_token
         redirect_to current_consumer.success_url, allow_other_host: true and return
       end
+    when :invalid
+      clear_cookies
     end
   end
 
@@ -66,8 +68,7 @@ private
 
       true
     rescue Aws::CognitoIdentityProvider::Errors::NotAuthorizedException
-      cookies.delete(:id_token, domain: ".#{current_consumer.cookie_domain}")
-      cookies.delete(:refresh_token, domain: ".#{current_consumer.cookie_domain}")
+      clear_cookies
       false
     rescue StandardError => e
       Rails.logger.error("Token refresh failed: #{e.message}")
