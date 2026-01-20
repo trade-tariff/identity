@@ -81,14 +81,14 @@ class PasswordlessController < ApplicationController
       user_attributes: [{ name: "email_verified", value: "true" }],
     })
 
-    cookies[:id_token] = {
+    cookies[id_token_cookie_name] = {
       value: encrypted(result.authentication_result.id_token),
       httponly: true,
       domain: current_consumer.cookie_domain,
       expires: 1.day.from_now,
     }
 
-    cookies[:refresh_token] = {
+    cookies[refresh_token_cookie_name] = {
       value: result.authentication_result.refresh_token,
       httponly: true,
       domain: current_consumer.cookie_domain,
@@ -104,6 +104,14 @@ class PasswordlessController < ApplicationController
   end
 
 private
+
+  def id_token_cookie_name
+    TradeTariffIdentity.id_token_cookie_name
+  end
+
+  def refresh_token_cookie_name
+    TradeTariffIdentity.refresh_token_cookie_name
+  end
 
   def permitted_params
     params.require(:passwordless_form).permit(:email)

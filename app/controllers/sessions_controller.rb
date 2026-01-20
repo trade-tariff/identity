@@ -23,7 +23,7 @@ private
   end
 
   def check_session
-    case CognitoTokenVerifier.call(cookies[:id_token], current_consumer)
+    case CognitoTokenVerifier.call(cookies[id_token_cookie_name], current_consumer)
     when :valid
       redirect_to current_consumer.success_url, allow_other_host: true and return
     when :expired
@@ -36,7 +36,7 @@ private
   end
 
   def refresh_session_with_token
-    return false if cookies[:refresh_token].blank?
+    return false if cookies[refresh_token_cookie_name].blank?
 
     begin
       client = TradeTariffIdentity.cognito_client
@@ -46,11 +46,11 @@ private
         client_id: TradeTariffIdentity.cognito_client_id,
         auth_flow: "REFRESH_TOKEN_AUTH",
         auth_parameters: {
-          "REFRESH_TOKEN" => cookies[:refresh_token],
+          "REFRESH_TOKEN" => cookies[refresh_token_cookie_name],
         },
       )
 
-      cookies[:id_token] = {
+      cookies[id_token_cookie_name] = {
         value: encrypted(response.authentication_result.id_token),
         httponly: true,
         domain: current_consumer.cookie_domain,
@@ -58,7 +58,7 @@ private
       }
 
       if response.authentication_result.refresh_token.present?
-        cookies[:refresh_token] = {
+        cookies[refresh_token_cookie_name] = {
           value: response.authentication_result.refresh_token,
           httponly: true,
           domain: current_consumer.cookie_domain,
@@ -74,5 +74,13 @@ private
       Rails.logger.error("Token refresh failed: #{e.message}")
       false
     end
+  end
+
+  def id_token_cookie_name
+    TradeTariffIdentity.id_token_cookie_name
+  end
+
+  def refresh_token_cookie_name
+    TradeTariffIdentity.refresh_token_cookie_name
   end
 end
