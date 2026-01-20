@@ -35,24 +35,24 @@ RSpec.describe TradeTariffIdentity do
     context "when environment is production" do
       let(:environment) { "production" }
 
-      it "returns id_token" do
-        expect(described_class.id_token_cookie_name).to eq("id_token")
+      it "returns :id_token" do
+        expect(described_class.id_token_cookie_name).to eq(:id_token)
       end
     end
 
     context "when environment is staging" do
       let(:environment) { "staging" }
 
-      it "returns staging_id_token" do
-        expect(described_class.id_token_cookie_name).to eq("staging_id_token")
+      it "returns :staging_id_token" do
+        expect(described_class.id_token_cookie_name).to eq(:staging_id_token)
       end
     end
 
     context "when environment is development" do
       let(:environment) { "development" }
 
-      it "returns development_id_token" do
-        expect(described_class.id_token_cookie_name).to eq("development_id_token")
+      it "returns :development_id_token" do
+        expect(described_class.id_token_cookie_name).to eq(:development_id_token)
       end
     end
   end
@@ -65,24 +65,24 @@ RSpec.describe TradeTariffIdentity do
     context "when environment is production" do
       let(:environment) { "production" }
 
-      it "returns refresh_token" do
-        expect(described_class.refresh_token_cookie_name).to eq("refresh_token")
+      it "returns :refresh_token" do
+        expect(described_class.refresh_token_cookie_name).to eq(:refresh_token)
       end
     end
 
     context "when environment is staging" do
       let(:environment) { "staging" }
 
-      it "returns staging_refresh_token" do
-        expect(described_class.refresh_token_cookie_name).to eq("staging_refresh_token")
+      it "returns :staging_refresh_token" do
+        expect(described_class.refresh_token_cookie_name).to eq(:staging_refresh_token)
       end
     end
 
     context "when environment is development" do
       let(:environment) { "development" }
 
-      it "returns development_refresh_token" do
-        expect(described_class.refresh_token_cookie_name).to eq("development_refresh_token")
+      it "returns :development_refresh_token" do
+        expect(described_class.refresh_token_cookie_name).to eq(:development_refresh_token)
       end
     end
   end

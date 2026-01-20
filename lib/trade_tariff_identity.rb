@@ -40,7 +40,7 @@ module TradeTariffIdentity
         base_name
       else
         "#{environment}_#{base_name}"
-      end
+      end.to_sym
     end
 
     def api_tokens
