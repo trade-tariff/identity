@@ -64,7 +64,7 @@ class PasswordlessController < ApplicationController
       render :invalid and return
     end
 
-    result = client.respond_to_auth_challenge(
+    response = client.respond_to_auth_challenge(
       client_id: TradeTariffIdentity.cognito_client_id,
       challenge_name: "CUSTOM_CHALLENGE",
       session: auth,
@@ -81,19 +81,7 @@ class PasswordlessController < ApplicationController
       user_attributes: [{ name: "email_verified", value: "true" }],
     })
 
-    cookies[id_token_cookie_name] = {
-      value: encrypted(result.authentication_result.id_token),
-      httponly: true,
-      domain: current_consumer.cookie_domain,
-      expires: 1.day.from_now,
-    }
-
-    cookies[refresh_token_cookie_name] = {
-      value: result.authentication_result.refresh_token,
-      httponly: true,
-      domain: current_consumer.cookie_domain,
-      expires: 30.days.from_now,
-    }
+    set_cookies(response.authentication_result)
 
     redirect_to current_consumer.success_url, allow_other_host: true
   rescue Aws::CognitoIdentityProvider::Errors::NotAuthorizedException
