@@ -32,17 +32,9 @@ private
       end
     case CognitoTokenVerifier.call(cookies[id_token_cookie_name], current_consumer)
     when :valid
-      if session[:state].nil?
-        redirect_to uri, allow_other_host: true and return
-      end
-
       redirect_to uri, allow_other_host: true and return
     when :expired
       if refresh_session_with_token
-        if session[:state].nil?
-          redirect_to uri, allow_other_host: true and return
-        end
-
         redirect_to uri, allow_other_host: true and return
       end
     when :invalid

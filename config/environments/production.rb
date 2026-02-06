@@ -53,11 +53,7 @@ Rails.application.configure do
   config.active_support.report_deprecations = false
 
   # Replace the default in-process memory cache store with a durable alternative.
-  config.cache_store = :redis_cache_store,
-    TradeTariffIdentity.redis_config.merge({
-      expires_in: 1.day,
-      namespace: ENV['GOVUK_APP_DOMAIN']
-    })
+  # config.cache_store = :mem_cache_store
 
   # Enable locale fallbacks for I18n (makes lookups for any locale fall back to
   # the I18n.default_locale when a translation cannot be found).
