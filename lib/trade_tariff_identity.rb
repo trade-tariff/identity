@@ -46,5 +46,11 @@ module TradeTariffIdentity
     def api_tokens
       JSON.parse(ENV.fetch("API_TOKENS", "{}"))
     end
+
+    def url_with_params(url, state)
+      uri = URI.parse(url)
+      uri.query = URI.encode_www_form({ "state" => state })
+      uri.to_s
+    end
   end
 end

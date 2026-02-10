@@ -5,6 +5,7 @@ class SessionsController < ApplicationController
 
   def index
     session[:consumer_id] = current_consumer.id
+    session[:state] = params[:state]
     redirect_to login_path
   end
 
@@ -23,12 +24,18 @@ private
   end
 
   def check_session
+    uri =
+      if session[:state]
+        TradeTariffIdentity.url_with_params(current_consumer.success_url, session[:state])
+      else
+        current_consumer.success_url
+      end
     case CognitoTokenVerifier.call(cookies[id_token_cookie_name], current_consumer)
     when :valid
-      redirect_to current_consumer.success_url, allow_other_host: true and return
+      redirect_to uri, allow_other_host: true and return
     when :expired
       if refresh_session_with_token
-        redirect_to current_consumer.success_url, allow_other_host: true and return
+        redirect_to uri, allow_other_host: true and return
       end
     when :invalid
       clear_cookies
