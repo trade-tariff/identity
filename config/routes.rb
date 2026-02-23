@@ -4,6 +4,8 @@ Rails.application.routes.draw do
 
   namespace :api, defaults: { format: 'json' } do
     resources :users, only: %i[show destroy]
+    post "client_credentials", to: "client_credentials#create"
+    delete "client_credentials/:client_id", to: "client_credentials#destroy"
   end
 
   resources :sessions, only: %i[index new]
