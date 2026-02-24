@@ -24,6 +24,8 @@ data "aws_iam_policy_document" "task" {
       "cognito-idp:AdminListGroupsForUser",
       "cognito-idp:AdminRemoveUserFromGroup",
       "cognito-idp:AdminUpdateUserAttributes",
+      "cognito-idp:CreateUserPoolClient",
+      "cognito-idp:DeleteUserPoolClient",
     ]
     resources = [data.aws_cognito_user_pool.this.arn]
   }
