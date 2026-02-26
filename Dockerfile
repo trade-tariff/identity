@@ -9,7 +9,7 @@ WORKDIR /app
 # build-base: compilation tools for bundle
 # git: used to pull gems from git
 # yarn: node package manager
-RUN apk add --update --no-cache build-base git tzdata yaml-dev && \
+RUN apk add --update --no-cache build-base git tzdata yaml-dev openssl-dev && \
   cp /usr/share/zoneinfo/Europe/London /etc/localtime && \
   echo "Europe/London" > /etc/timezone
 
@@ -65,4 +65,5 @@ HEALTHCHECK CMD nc -z 0.0.0.0 $PORT
 
 USER tariff
 
-CMD ["bundle", "exec", "rails", "server", "-b", "0.0.0.0"]
+#CMD ["bundle", "exec", "rails", "server", "-b", "0.0.0.0"]
+CMD ["bundle", "exec", "puma", "-C", "config/puma.rb"]

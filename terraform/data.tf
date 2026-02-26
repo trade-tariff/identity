@@ -33,6 +33,14 @@ data "aws_secretsmanager_secret_version" "this" {
   secret_id = data.aws_secretsmanager_secret.this.id
 }
 
+data "aws_secretsmanager_secret" "ecs_tls_certificate" {
+  name = "ecs-tls-certificate"
+}
+
+data "aws_secretsmanager_secret_version" "ecs_tls_certificate" {
+  secret_id = data.aws_secretsmanager_secret.ecs_tls_certificate.id
+}
+
 data "aws_cognito_user_pool" "this" {
   user_pool_id = local.secret_map["COGNITO_USER_POOL_ID"]
 }

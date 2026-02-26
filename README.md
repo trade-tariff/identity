@@ -23,9 +23,7 @@ AWS_SECRET_ACCESS_KEY
 AWS_SESSION_TOKEN
 ```
 
-###
-
-Start the app with
+### Start the app with
 
 ``` sh
 bin/dev
