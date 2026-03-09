@@ -38,6 +38,12 @@ variable "memory" {
   type        = number
 }
 
+variable "container_port" {
+  description = "Listening port."
+  type        = number
+  default     = 8080
+}
+
 variable "autoscaling_metrics" {
   description = "A map of autoscaling metrics."
   type = map(object({
