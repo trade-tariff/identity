@@ -43,21 +43,3 @@ variable "container_port" {
   type        = number
   default     = 8080
 }
-
-variable "autoscaling_metrics" {
-  description = "A map of autoscaling metrics."
-  type = map(object({
-    metric_type  = string
-    target_value = number
-  }))
-  default = {
-    cpu = {
-      metric_type  = "ECSServiceAverageCPUUtilization"
-      target_value = 40
-    },
-    memory = {
-      metric_type  = "ECSServiceAverageMemoryUtilization"
-      target_value = 40
-    }
-  }
-}
