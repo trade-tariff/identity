@@ -37,3 +37,15 @@ variable "memory" {
   description = "Memory to allocate in MB. Powers of 2 only."
   type        = number
 }
+
+variable "container_port" {
+  description = "Listening port."
+  type        = number
+  default     = 8080
+}
+
+variable "container_protocol" {
+  description = "Protocol the application exposes."
+  type        = string
+  default     = "http"
+}
