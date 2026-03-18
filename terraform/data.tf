@@ -17,6 +17,10 @@ data "aws_lb_target_group" "this" {
   name = "identity"
 }
 
+data "aws_lb_target_group" "this_https" {
+  name = "identity-https"
+}
+
 data "aws_security_group" "this" {
   name = "trade-tariff-ecs-security-group-${var.environment}"
 }
