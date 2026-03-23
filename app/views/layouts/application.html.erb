@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html class="govuk-template govuk-template--rebranded app-html-class" lang="en">
+<html class="govuk-template app-html-class" lang="en">
   <head>
     <title><%= page_title %></title>
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -20,7 +20,9 @@
     <%= javascript_importmap_tags %>
   </head>
 
-  <%= govuk_header(homepage_url: "#", service_name: "UK Integrated Online Tariff", service_url: ENV.fetch('SERVICE_URL', "https://trade-tariff.service.gov.uk/find_commodity")) %>
+  <%= govuk_header(homepage_url: "#") do |header|
+    header.with_service_navigation(service_name: "UK Integrated Online Tariff", service_url: ENV.fetch('SERVICE_URL', "https://trade-tariff.service.gov.uk/find_commodity"))
+  end %>
 
   <body class="govuk-template__body app-body-class">
     <div class="govuk-width-container app-width-container">
