@@ -1,0 +1,40 @@
+<% page_title "Enter the code", @one_time_code_form %>
+<% @one_time_code_form ||= OneTimeCodeForm.new %>
+
+<%= form_with model: @one_time_code_form, url: verify_one_time_code_path, local: true, html: { autocomplete: "off" } do |f| %>
+  <%= f.govuk_error_summary %>
+
+  <h1 class="govuk-heading-l">Enter the code</h1>
+
+  <p class="govuk-body">We have sent a code to <strong><%= @email %></strong></p>
+  <div class="govuk-inset-text">The code will stop working after 15 minutes.</div>
+
+  <%= f.govuk_text_field :code,
+                         label: { text: "Security code" },
+                         required: true,
+                         width: "one-quarter" %>
+
+  <%= f.govuk_submit "Continue" %>
+<% end %>
+
+<details class="govuk-details">
+  <summary class="govuk-details__summary">
+    <span class="govuk-details__summary-text">
+      Not received a code?
+    </span>
+  </summary>
+
+  <div class="govuk-details__text">
+    <p class="govuk-body">
+      Emails sometimes take a few minutes to arrive.
+    </p>
+
+    <p class="govuk-body">
+      If you do not receive an email soon, check your spam or junk folder.
+    </p>
+
+    <p class="govuk-body">
+      If this does not work, <a class="govuk-link" href="mailto:tariffmanagement@hmrc.gov.uk">contact us</a> for help.
+    </p>
+  </div>
+</details>

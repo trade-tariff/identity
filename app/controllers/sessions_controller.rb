@@ -14,6 +14,10 @@ class SessionsController < ApplicationController
     if current_consumer.passwordless?
       @passwordless = PasswordlessForm.new
     end
+
+    if current_consumer.one_time_code?
+      @one_time_code = PasswordlessForm.new
+    end
   end
 
 private

@@ -1,0 +1,24 @@
+<% page_title "Enter email address", @one_time_code %>
+
+<%= form_with model: @one_time_code, url: one_time_code_path, local: true, html: { autocomplete: "off" } do |f| %>
+  <%= f.govuk_error_summary %>
+
+  <h1 class="govuk-heading-l">Enter your email address</h1>
+
+  <%= f.govuk_email_field :email, required: true, width: 'one-half' %>
+
+  <p class="govuk-body">
+    A one-time security code will be sent to your email address.
+  </p>
+
+  <p class="govuk-body">
+    By continuing, you confirm that you agree to our:
+  </p>
+
+  <ul class="govuk-list govuk-list--bullet">
+    <li><a class="govuk-link" href="https://www.trade-tariff.service.gov.uk/privacy" target="_blank">privacy notice (opens in new tab)</a>, which explains how we use your personal information</li>
+    <li><a class="govuk-link" href="https://www.trade-tariff.service.gov.uk/terms" target="_blank">terms and conditions (opens in new tab)</a></li>
+  </ul>
+
+  <%= f.govuk_submit %>
+<% end %>

@@ -1,2 +1,3 @@
 <%= render 'sessions/flash' %>
 <%= render 'sessions/passwordless' if current_consumer.passwordless? %>
+<%= render 'sessions/one_time_code' if current_consumer.one_time_code? %>
