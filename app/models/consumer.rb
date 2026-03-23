@@ -22,4 +22,8 @@ class Consumer
   def passwordless?
     methods.include?(:passwordless)
   end
+
+  def one_time_code?
+    methods.include?(:one_time_code)
+  end
 end
