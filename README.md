@@ -23,6 +23,12 @@ AWS_SECRET_ACCESS_KEY
 AWS_SESSION_TOKEN
 ```
 
+For the one-time code login method, also add:
+
+``` sh
+OTP_COGNITO_CLIENT_ID
+```
+
 ### Start the app with
 
 ``` sh
@@ -43,3 +49,8 @@ When the user is redirected to the service, a Cognito JWT is set as a cookie
 called `id_token` which contains the user's details. In non-development
 environments the token is encrypted using `ENCRYPTION_SECRET`. This needs to
 be shared with the consuming service.
+
+## One-Time Code Login
+
+An alternative login method that sends a short-lived numeric code to the user's
+email address. The user enters the code in-app rather than clicking a link.
