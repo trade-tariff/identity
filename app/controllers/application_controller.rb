@@ -10,8 +10,10 @@ class ApplicationController < ActionController::Base
   end
 
   def clear_cookies
-    cookies.delete(id_token_cookie_name, domain: ".#{current_consumer.cookie_domain}")
-    cookies.delete(refresh_token_cookie_name, domain: ".#{current_consumer.cookie_domain}")
+    return if current_consumer.nil?
+
+    cookies.delete(id_token_cookie_name, domain: current_consumer.cookie_domain)
+    cookies.delete(refresh_token_cookie_name, domain: current_consumer.cookie_domain)
   end
 
   def set_cookies(result)
