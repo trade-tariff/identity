@@ -2,13 +2,16 @@ require "rails_helper"
 
 describe RemoveUnverifiedUsersJob do
   def setup_response(age, username, email_verified, group_name = "myott", pagination_token = nil)
-    groups_response = instance_double(Aws::CognitoIdentityProvider::Types::AdminListGroupsForUserResponse, groups: [instance_double(Aws::CognitoIdentityProvider::Types::GroupType, group_name: group_name)])
+    instance_double(Aws::CognitoIdentityProvider::Types::AdminListGroupsForUserResponse,
+                    groups: [instance_double(Aws::CognitoIdentityProvider::Types::GroupType, group_name:)])
+    empty_groups_response = instance_double(Aws::CognitoIdentityProvider::Types::AdminListGroupsForUserResponse, groups: [])
 
-    allow(client).to receive_messages(
-      list_users: instance_double(Aws::CognitoIdentityProvider::Types::ListUsersResponse, users: [instance_double(Aws::CognitoIdentityProvider::Types::UserType, user_create_date: age, username:, attributes: [instance_double(Aws::CognitoIdentityProvider::Types::AttributeType, name: "email_verified", value: email_verified)])], pagination_token:),
-      admin_list_groups_for_user: groups_response,
-      admin_delete_user: nil,
-    )
+    allow(client).to receive_messages(list_users: instance_double(Aws::CognitoIdentityProvider::Types::ListUsersResponse,
+                                                                  users: [instance_double(Aws::CognitoIdentityProvider::Types::UserType, user_create_date: age,
+                                                                                                                                         username:, attributes: [instance_double(Aws::CognitoIdentityProvider::Types::AttributeType, name: "email_verified", value: email_verified)])],
+                                                                  pagination_token:), admin_list_groups_for_user: empty_groups_response)
+    allow(client).to receive(:admin_remove_user_from_group)
+    allow(client).to receive(:admin_delete_user)
   end
 
   let(:client) { instance_double(Aws::CognitoIdentityProvider::Client) }
@@ -37,27 +40,41 @@ describe RemoveUnverifiedUsersJob do
     expect(client).not_to have_received(:admin_delete_user)
   end
 
-  it "does not delete users if not in myott group" do
-    setup_response(2.days.ago, "old_unverified_not_myott", "false", "other_group")
+  it "does not delete users if not in myott group", :aggregate_failures do # rubocop:disable RSpec/ExampleLength
+    groups_response = instance_double(Aws::CognitoIdentityProvider::Types::AdminListGroupsForUserResponse,
+                                      groups: [instance_double(Aws::CognitoIdentityProvider::Types::GroupType, group_name: "other_group")])
+    allow(client).to receive_messages(list_users: instance_double(Aws::CognitoIdentityProvider::Types::ListUsersResponse,
+                                                                  users: [instance_double(Aws::CognitoIdentityProvider::Types::UserType, user_create_date: 2.days.ago,
+                                                                                                                                         username: "old_unverified_not_myott",
+                                                                                                                                         attributes: [instance_double(Aws::CognitoIdentityProvider::Types::AttributeType, name: "email_verified", value: "false")])],
+                                                                  pagination_token: nil), admin_list_groups_for_user: groups_response)
+    allow(client).to receive(:admin_remove_user_from_group)
+    allow(client).to receive(:admin_delete_user)
+
     described_class.perform_now
     expect(client).not_to have_received(:admin_delete_user)
   end
 
   it "handles pagination and deletes users across multiple pages", :aggregate_failures do # rubocop:disable RSpec/ExampleLength
     first_page_users = [
-      instance_double(Aws::CognitoIdentityProvider::Types::UserType, user_create_date: 2.days.ago, username: "old_unverified_1", attributes: [instance_double(Aws::CognitoIdentityProvider::Types::AttributeType, name: "email_verified", value: "false")]),
+      instance_double(Aws::CognitoIdentityProvider::Types::UserType, user_create_date: 2.days.ago,
+                                                                     username: "old_unverified_1",
+                                                                     attributes: [instance_double(Aws::CognitoIdentityProvider::Types::AttributeType, name: "email_verified", value: "false")]),
     ]
     second_page_users = [
-      instance_double(Aws::CognitoIdentityProvider::Types::UserType, user_create_date: 2.days.ago, username: "old_unverified_2", attributes: [instance_double(Aws::CognitoIdentityProvider::Types::AttributeType, name: "email_verified", value: "false")]),
+      instance_double(Aws::CognitoIdentityProvider::Types::UserType, user_create_date: 2.days.ago,
+                                                                     username: "old_unverified_2",
+                                                                     attributes: [instance_double(Aws::CognitoIdentityProvider::Types::AttributeType, name: "email_verified", value: "false")]),
     ]
 
-    groups_response = instance_double(Aws::CognitoIdentityProvider::Types::AdminListGroupsForUserResponse, groups: [instance_double(Aws::CognitoIdentityProvider::Types::GroupType, group_name: "myott")])
+    empty_groups_response = instance_double(Aws::CognitoIdentityProvider::Types::AdminListGroupsForUserResponse, groups: [])
 
     allow(client).to receive(:list_users).and_return(
       instance_double(Aws::CognitoIdentityProvider::Types::ListUsersResponse, users: first_page_users, pagination_token: "next-token"),
       instance_double(Aws::CognitoIdentityProvider::Types::ListUsersResponse, users: second_page_users, pagination_token: nil),
     )
-    allow(client).to receive(:admin_list_groups_for_user).and_return(groups_response)
+    allow(client).to receive(:admin_list_groups_for_user).and_return(empty_groups_response)
+    allow(client).to receive(:admin_remove_user_from_group)
     allow(client).to receive(:admin_delete_user)
 
     described_class.perform_now
