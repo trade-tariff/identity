@@ -1,12 +1,10 @@
 <div class="govuk-grid-row">
   <div class="govuk-grid-column-two-thirds">
-    <h1 class="govuk-heading-l">Verification link invalid</h1>
+    <h1 class="govuk-heading-l">Different browser detected</h1>
 
-    <p class="govuk-body">This could be because:</p>
-
-    <ul class="govuk-list govuk-list--bullet">
-      <li>the verification link has expired</li>
-      <li>you have switched web browser</li>
-    </ul>
+    <p class="govuk-body">Your system has opened the verification link in a different browser.</p>
+    <p class="govuk-body">To login, copy/paste your verification link into the address bar of the browser you submitted your email in.</p>
+    <p class="govuk-body">Your verification link:</p>
+    <pre class="govuk-!-font-family-monospace"><%= @verification_link %></pre>
   </div>
 </div>
