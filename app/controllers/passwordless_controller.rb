@@ -93,14 +93,6 @@ class PasswordlessController < ApplicationController
 
 private
 
-  def id_token_cookie_name
-    TradeTariffIdentity.id_token_cookie_name
-  end
-
-  def refresh_token_cookie_name
-    TradeTariffIdentity.refresh_token_cookie_name
-  end
-
   def permitted_params
     params.require(:passwordless_form).permit(:email)
   end

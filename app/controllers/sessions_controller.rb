@@ -61,12 +61,4 @@ private
       false
     end
   end
-
-  def id_token_cookie_name
-    TradeTariffIdentity.id_token_cookie_name
-  end
-
-  def refresh_token_cookie_name
-    TradeTariffIdentity.refresh_token_cookie_name
-  end
 end
