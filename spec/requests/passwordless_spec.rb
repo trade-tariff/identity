@@ -150,8 +150,17 @@ RSpec.describe "Passwordless", type: :request do
         get callback_passwordless_path, params: { email:, token: "token" }
 
         expect(response).to have_http_status(:ok)
-        expect(response.body).to include("Verification link invalid")
-        expect(response.body).to include("the verification link has expired")
+        expect(response.body).to include("Different browser detected")
+        expect(response.body).to include("Your system has opened the verification link in a different browser.")
+      end
+
+      it "shows the verification link from the current request URL" do
+        allow(Consumer).to receive(:load).with(consumer.id).and_return(nil)
+
+        get callback_passwordless_path, params: { email:, token: "token" }
+
+        expected_url = callback_passwordless_url(email:, token: "token")
+        expect(response.body).to include(expected_url.gsub("&", "&amp;"))
       end
     end
   end

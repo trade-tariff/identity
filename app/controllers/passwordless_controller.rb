@@ -61,6 +61,7 @@ class PasswordlessController < ApplicationController
     auth = session[:login]
 
     if current_consumer.nil?
+      @verification_link = request.original_url
       render :invalid and return
     end
 
