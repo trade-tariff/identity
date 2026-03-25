@@ -1,5 +1,8 @@
 module Api
   class ClientCredentialsController < Api::ApplicationController
+    rescue_from Aws::CognitoIdentityProvider::Errors::ServiceError, with: :cognito_service_error
+    rescue_from Aws::CognitoIdentityProvider::Errors::InvalidParameterException, with: :invalid_parameter
+
     def create
       scopes = params[:scopes]
       if scopes.blank?
@@ -28,14 +31,10 @@ module Api
         client_id: response.user_pool_client.client_id,
         client_secret: response.user_pool_client.client_secret,
       }, status: :created
-    rescue Aws::CognitoIdentityProvider::Errors::InvalidParameterException => e
-      render json: { error: "Invalid request: #{e.message}" }, status: :unprocessable_entity
     rescue Aws::CognitoIdentityProvider::Errors::LimitExceededException => e
       render json: { error: "Cognito limit exceeded: #{e.message}" }, status: :service_unavailable
     rescue Aws::CognitoIdentityProvider::Errors::ResourceNotFoundException => e
       render json: { error: "User pool not found: #{e.message}" }, status: :not_found
-    rescue Aws::CognitoIdentityProvider::Errors::ServiceError => e
-      render json: { error: "Cognito error: #{e.message}" }, status: :bad_gateway
     end
 
     def destroy
@@ -55,10 +54,16 @@ module Api
       head :no_content
     rescue Aws::CognitoIdentityProvider::Errors::ResourceNotFoundException => e
       render json: { error: "App client not found: #{e.message}" }, status: :not_found
-    rescue Aws::CognitoIdentityProvider::Errors::InvalidParameterException => e
-      render json: { error: "Invalid request: #{e.message}" }, status: :unprocessable_entity
-    rescue Aws::CognitoIdentityProvider::Errors::ServiceError => e
-      render json: { error: "Cognito error: #{e.message}" }, status: :bad_gateway
+    end
+
+  private
+
+    def invalid_parameter(exception)
+      render json: { error: "Invalid request: #{exception.message}" }, status: :unprocessable_entity
+    end
+
+    def cognito_service_error(exception)
+      render json: { error: "Cognito error: #{exception.message}" }, status: :bad_gateway
     end
   end
 end
