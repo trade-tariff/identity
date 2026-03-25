@@ -41,16 +41,13 @@ class PasswordlessController < ApplicationController
       render :invalid and return
     end
 
-    response = cognito.respond_to_custom_challenge(
-      session: auth,
-      username: email,
-      answer: token,
-    )
+    token_service = TokenService.new
+    result = token_service.exchange_challenge(session: auth, username: email, answer: token)
 
     # Set email as verified
-    cognito.update_user_attributes(email, [{ name: "email_verified", value: "true" }])
+    token_service.verify_email(email)
 
-    set_cookies(response.authentication_result)
+    set_cookies(result)
 
     redirect_to current_consumer.success_url, allow_other_host: true
   rescue Aws::CognitoIdentityProvider::Errors::NotAuthorizedException

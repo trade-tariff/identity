@@ -39,12 +39,8 @@ private
     return false if cookies[refresh_token_cookie_name].blank?
 
     begin
-      response = CognitoServiceAdapter.new.initiate_refresh_token_auth(
-        cookies[refresh_token_cookie_name],
-      )
-
-      set_cookies(response.authentication_result)
-
+      result = TokenService.new.refresh(cookies[refresh_token_cookie_name])
+      set_cookies(result)
       true
     rescue Aws::CognitoIdentityProvider::Errors::NotAuthorizedException
       clear_cookies
