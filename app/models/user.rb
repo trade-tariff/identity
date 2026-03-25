@@ -2,18 +2,13 @@ class User
   include ActiveModel::Model
 
   def self.find(username, group = nil)
-    client = TradeTariffIdentity.cognito_client
+    cognito = CognitoServiceAdapter.new
 
     begin
-      arguments = {
-        user_pool_id: TradeTariffIdentity.cognito_user_pool_id,
-        username: username,
-      }
-
-      user_response = client.admin_get_user(arguments)
+      user_response = cognito.find_user(username)
 
       unless Rails.env.development?
-        groups_response = client.admin_list_groups_for_user(arguments)
+        groups_response = cognito.list_user_groups(username)
 
         in_group = groups_response.groups.any? { |g| g.group_name == group }
         return nil unless in_group
@@ -29,22 +24,15 @@ class User
   end
 
   def self.destroy(username, group = nil)
-    client = TradeTariffIdentity.cognito_client
-
-    arguments = {
-      user_pool_id: TradeTariffIdentity.cognito_user_pool_id,
-      username: username,
-    }
+    cognito = CognitoServiceAdapter.new
 
     begin
       unless Rails.env.development?
-        client.admin_remove_user_from_group(
-          arguments.merge(group_name: group),
-        )
+        cognito.remove_from_group(username, group_name: group)
       end
 
-      if client.admin_list_groups_for_user(arguments).groups.none?
-        client.admin_delete_user(arguments)
+      if cognito.list_user_groups(username).groups.none?
+        cognito.delete_user(username)
       end
 
       true

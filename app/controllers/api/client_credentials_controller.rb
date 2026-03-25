@@ -10,19 +10,9 @@ module Api
         return render json: { error: "scopes must be an array" }, status: :bad_request
       end
 
-      client = TradeTariffIdentity.cognito_client
-      user_pool_id = TradeTariffIdentity.cognito_user_pool_id
       client_name = "devhub-#{Time.zone.now.to_i}"
 
-      response = client.create_user_pool_client(
-        user_pool_id:,
-        client_name:,
-        generate_secret: true,
-        allowed_o_auth_flows: %w[client_credentials],
-        allowed_o_auth_scopes: scopes,
-        allowed_o_auth_flows_user_pool_client: true,
-        supported_identity_providers: %w[COGNITO],
-      )
+      response = cognito.create_user_pool_client(client_name:, scopes:)
 
       render json: {
         client_id: response.user_pool_client.client_id,
@@ -44,13 +34,7 @@ module Api
         return render json: { error: "client_id is required" }, status: :bad_request
       end
 
-      client = TradeTariffIdentity.cognito_client
-      user_pool_id = TradeTariffIdentity.cognito_user_pool_id
-
-      client.delete_user_pool_client(
-        user_pool_id:,
-        client_id:,
-      )
+      cognito.delete_user_pool_client(client_id:)
 
       head :no_content
     rescue Aws::CognitoIdentityProvider::Errors::ResourceNotFoundException => e
@@ -59,6 +43,12 @@ module Api
       render json: { error: "Invalid request: #{e.message}" }, status: :unprocessable_entity
     rescue Aws::CognitoIdentityProvider::Errors::ServiceError => e
       render json: { error: "Cognito error: #{e.message}" }, status: :bad_gateway
+    end
+
+  private
+
+    def cognito
+      @cognito ||= CognitoServiceAdapter.new
     end
   end
 end

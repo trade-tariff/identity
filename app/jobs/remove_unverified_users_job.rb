@@ -2,15 +2,11 @@ class RemoveUnverifiedUsersJob < ApplicationJob
   queue_as :default
 
   def perform
-    client = TradeTariffIdentity.cognito_client
-    user_pool_id = TradeTariffIdentity.cognito_user_pool_id
+    cognito = CognitoServiceAdapter.new
     pagination_token = nil
 
     loop do
-      response = client.list_users({
-        user_pool_id:,
-        pagination_token:,
-      }.compact)
+      response = cognito.list_users(pagination_token:)
 
       response.users.each do |user|
         created_at = user.user_create_date
