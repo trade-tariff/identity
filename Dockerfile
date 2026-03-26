@@ -39,9 +39,12 @@ RUN \
 # Build runtime image
 FROM ruby:${RUBY_VERSION}-alpine${ALPINE_VERSION} AS production
 
-RUN apk add --update --no-cache tzdata && \
-  cp /usr/share/zoneinfo/Europe/London /etc/localtime && \
-  echo "Europe/London" > /etc/timezone
+RUN apk add --update --no-cache \
+    bash \
+    socat \
+    tzdata && \
+    cp /usr/share/zoneinfo/Europe/London /etc/localtime && \
+    echo "Europe/London" > /etc/timezone
 
 # The application runs from /app
 WORKDIR /app
