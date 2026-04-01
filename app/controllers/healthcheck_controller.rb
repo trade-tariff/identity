@@ -3,7 +3,7 @@ class HealthcheckController < ApplicationController
 
   def check
     NewRelic::Agent.ignore_transaction
-    render json: { status: "ok" }, status: :ok
+    render json: { git_sha1: TradeTariffIdentity.revision }, status: :ok
   end
 
   def checkz
