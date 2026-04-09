@@ -10,34 +10,10 @@ class PasswordlessController < ApplicationController
 
     email = @passwordless.email
 
-    # try to create the user if they don’t exist
-    begin
-      client.admin_get_user(
-        user_pool_id: TradeTariffIdentity.cognito_user_pool_id,
-        username: email,
-      )
-    rescue Aws::CognitoIdentityProvider::Errors::UserNotFoundException
-      client.admin_create_user(
-        user_pool_id: TradeTariffIdentity.cognito_user_pool_id,
-        username: email,
-        user_attributes: [{ name: "email", value: email }],
-        message_action: "SUPPRESS",
-      )
-    end
+    find_or_create_user(email)
+    add_user_to_consumer_group(email)
 
-    client.admin_add_user_to_group(
-      user_pool_id: TradeTariffIdentity.cognito_user_pool_id,
-      username: email,
-      group_name: current_consumer.id,
-    )
-
-    # Start custom auth to trigger your Lambda to send the link
-    resp = client.admin_initiate_auth(
-      user_pool_id: TradeTariffIdentity.cognito_user_pool_id,
-      client_id: TradeTariffIdentity.cognito_client_id,
-      auth_flow: "CUSTOM_AUTH",
-      auth_parameters: { "USERNAME" => email },
-    )
+    resp = initiate_passwordless_auth(email)
 
     session[:email] = email
     session[:login] = resp.session
@@ -93,6 +69,37 @@ class PasswordlessController < ApplicationController
   end
 
 private
+
+  def find_or_create_user(email)
+    client.admin_get_user(
+      user_pool_id: TradeTariffIdentity.cognito_user_pool_id,
+      username: email,
+    )
+  rescue Aws::CognitoIdentityProvider::Errors::UserNotFoundException
+    client.admin_create_user(
+      user_pool_id: TradeTariffIdentity.cognito_user_pool_id,
+      username: email,
+      user_attributes: [{ name: "email", value: email }],
+      message_action: "SUPPRESS",
+    )
+  end
+
+  def add_user_to_consumer_group(email)
+    client.admin_add_user_to_group(
+      user_pool_id: TradeTariffIdentity.cognito_user_pool_id,
+      username: email,
+      group_name: current_consumer.id,
+    )
+  end
+
+  def initiate_passwordless_auth(email)
+    client.admin_initiate_auth(
+      user_pool_id: TradeTariffIdentity.cognito_user_pool_id,
+      client_id: TradeTariffIdentity.cognito_client_id,
+      auth_flow: "CUSTOM_AUTH",
+      auth_parameters: { "USERNAME" => email },
+    )
+  end
 
   def permitted_params
     params.require(:passwordless_form).permit(:email)
