@@ -10,17 +10,10 @@ class PasswordlessController < ApplicationController
 
     email = @passwordless.email
 
-    # try to create the user if they don't exist
-    begin
-      cognito.find_user(email)
-    rescue Aws::CognitoIdentityProvider::Errors::UserNotFoundException
-      cognito.create_user(email, email:)
-    end
+    find_or_create_user(email)
+    add_user_to_consumer_group(email)
 
-    cognito.add_to_group(email, group_name: current_consumer.id)
-
-    # Start custom auth to trigger your Lambda to send the link
-    resp = cognito.initiate_custom_auth(email)
+    resp = initiate_passwordless_auth(email)
 
     session[:email] = email
     session[:login] = resp.session
@@ -68,6 +61,20 @@ class PasswordlessController < ApplicationController
   end
 
 private
+
+  def find_or_create_user(email)
+    cognito.find_user(email)
+  rescue Aws::CognitoIdentityProvider::Errors::UserNotFoundException
+    cognito.create_user(email, email:)
+  end
+
+  def add_user_to_consumer_group(email)
+    cognito.add_to_group(email, group_name: current_consumer.id)
+  end
+
+  def initiate_passwordless_auth(email)
+    cognito.initiate_custom_auth(email)
+  end
 
   def permitted_params
     params.require(:passwordless_form).permit(:email)
