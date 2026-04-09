@@ -26,6 +26,10 @@ module TradeTariffIdentity
       ENV.fetch("ENVIRONMENT", "production")
     end
 
+    def revision
+      @revision ||= `cat REVISION 2>/dev/null || echo 'development'`.strip
+    end
+
     def id_token_cookie_name
       cookie_name_for("id_token")
     end

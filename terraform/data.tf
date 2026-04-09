@@ -1,3 +1,5 @@
+data "aws_caller_identity" "current" {}
+
 data "aws_vpc" "vpc" {
   tags = { Name = "trade-tariff-${var.environment}-vpc" }
 }
@@ -47,4 +49,8 @@ data "aws_secretsmanager_secret_version" "ecs_tls_certificate" {
 
 data "aws_cognito_user_pool" "this" {
   user_pool_id = local.secret_map["COGNITO_USER_POOL_ID"]
+}
+
+data "aws_ecs_cluster" "this" {
+  cluster_name = "trade-tariff-cluster-${var.environment}"
 }

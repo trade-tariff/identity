@@ -23,7 +23,7 @@ module "service" {
 
   cloudwatch_log_group_name = "platform-logs-${var.environment}"
 
-  docker_image = "382373577178.dkr.ecr.eu-west-2.amazonaws.com/tariff-identity-production"
+  docker_image = local.ecr_repo
   docker_tag   = var.docker_tag
   skip_destroy = true
 

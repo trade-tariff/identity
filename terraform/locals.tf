@@ -1,4 +1,5 @@
 locals {
+  account_id     = data.aws_caller_identity.current.account_id
   has_autoscaler = var.environment == "development" ? false : true
   secret_value   = try(data.aws_secretsmanager_secret_version.this.secret_string, "{}")
   secret_map     = jsondecode(local.secret_value)
@@ -27,4 +28,5 @@ locals {
   ]
 
   identity_service_env_vars = concat(local.secret_env_vars, local.ecs_tls_env_vars)
+  ecr_repo                  = "382373577178.dkr.ecr.eu-west-2.amazonaws.com/tariff-identity-production"
 }
