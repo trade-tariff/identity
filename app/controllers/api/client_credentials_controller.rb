@@ -59,7 +59,7 @@ module Api
   private
 
     def invalid_parameter(exception)
-      render json: { error: "Invalid request: #{exception.message}" }, status: :unprocessable_entity
+      render json: { error: "Invalid request: #{exception.message}" }, status: :unprocessable_content
     end
 
     def cognito_service_error(exception)
