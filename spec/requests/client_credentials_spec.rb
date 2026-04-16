@@ -101,7 +101,7 @@ RSpec.describe "Client credentials API", type: :request do
       it "returns 422" do
         post "/api/client_credentials", params: { scopes: ["tariff/read"] }.to_json, headers: headers
 
-        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response).to have_http_status(:unprocessable_content)
       end
 
       it "returns error message in body" do
