@@ -39,15 +39,8 @@ private
     return false if cookies[refresh_token_cookie_name].blank?
 
     begin
-      client = TradeTariffIdentity.cognito_client
-
-      response = client.admin_initiate_auth(
-        user_pool_id: TradeTariffIdentity.cognito_user_pool_id,
-        client_id: TradeTariffIdentity.cognito_client_id,
-        auth_flow: "REFRESH_TOKEN_AUTH",
-        auth_parameters: {
-          "REFRESH_TOKEN" => cookies[refresh_token_cookie_name],
-        },
+      response = CognitoServiceAdapter.new.initiate_refresh_token_auth(
+        cookies[refresh_token_cookie_name],
       )
 
       set_cookies(response.authentication_result)

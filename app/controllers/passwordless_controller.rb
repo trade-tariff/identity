@@ -41,22 +41,14 @@ class PasswordlessController < ApplicationController
       render :invalid and return
     end
 
-    response = client.respond_to_auth_challenge(
-      client_id: TradeTariffIdentity.cognito_client_id,
-      challenge_name: "CUSTOM_CHALLENGE",
+    response = cognito.respond_to_custom_challenge(
       session: auth,
-      challenge_responses: {
-        "USERNAME" => email,
-        "ANSWER" => token,
-      },
+      username: email,
+      answer: token,
     )
 
     # Set email as verified
-    client.admin_update_user_attributes({
-      user_pool_id: TradeTariffIdentity.cognito_user_pool_id,
-      username: email,
-      user_attributes: [{ name: "email_verified", value: "true" }],
-    })
+    cognito.update_user_attributes(email, [{ name: "email_verified", value: "true" }])
 
     set_cookies(response.authentication_result)
 
@@ -71,41 +63,24 @@ class PasswordlessController < ApplicationController
 private
 
   def find_or_create_user(email)
-    client.admin_get_user(
-      user_pool_id: TradeTariffIdentity.cognito_user_pool_id,
-      username: email,
-    )
+    cognito.find_user(email)
   rescue Aws::CognitoIdentityProvider::Errors::UserNotFoundException
-    client.admin_create_user(
-      user_pool_id: TradeTariffIdentity.cognito_user_pool_id,
-      username: email,
-      user_attributes: [{ name: "email", value: email }],
-      message_action: "SUPPRESS",
-    )
+    cognito.create_user(email, email:)
   end
 
   def add_user_to_consumer_group(email)
-    client.admin_add_user_to_group(
-      user_pool_id: TradeTariffIdentity.cognito_user_pool_id,
-      username: email,
-      group_name: current_consumer.id,
-    )
+    cognito.add_to_group(email, group_name: current_consumer.id)
   end
 
   def initiate_passwordless_auth(email)
-    client.admin_initiate_auth(
-      user_pool_id: TradeTariffIdentity.cognito_user_pool_id,
-      client_id: TradeTariffIdentity.cognito_client_id,
-      auth_flow: "CUSTOM_AUTH",
-      auth_parameters: { "USERNAME" => email },
-    )
+    cognito.initiate_custom_auth(email)
   end
 
   def permitted_params
     params.require(:passwordless_form).permit(:email)
   end
 
-  def client
-    @client ||= TradeTariffIdentity.cognito_client
+  def cognito
+    @cognito ||= CognitoServiceAdapter.new
   end
 end
