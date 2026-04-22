@@ -2,7 +2,7 @@ Rails.application.routes.draw do
   get "/healthcheck", to: "healthcheck#check"
   get "/healthcheckz", to: "healthcheck#checkz"
 
-  namespace :api, defaults: { format: 'json' } do
+  namespace :api, defaults: { format: "json" } do
     resources :users, only: %i[show destroy]
     post "client_credentials", to: "client_credentials#create"
     delete "client_credentials/:client_id", to: "client_credentials#destroy"
@@ -12,6 +12,10 @@ Rails.application.routes.draw do
   resource :passwordless, only: %i[create show], controller: :passwordless do
     get "callback", on: :member
     get "invalid", on: :member
+  end
+
+  resource :one_time_code, only: %i[create show], controller: :one_time_code do
+    post "verify", on: :member
   end
 
   get "login", to: "sessions#new"

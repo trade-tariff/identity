@@ -8,6 +8,10 @@ module TradeTariffIdentity
       ENV["COGNITO_CLIENT_ID"]
     end
 
+    def otp_cognito_client_id
+      ENV["OTP_COGNITO_CLIENT_ID"]
+    end
+
     def cognito_user_pool_id
       ENV["COGNITO_USER_POOL_ID"]
     end
