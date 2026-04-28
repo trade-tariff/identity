@@ -45,12 +45,10 @@ class CognitoServiceAdapter
     )
   end
 
-  def initiate_refresh_token_auth(refresh_token)
-    @client.admin_initiate_auth(
-      user_pool_id: @user_pool_id,
+  def refresh_tokens(refresh_token)
+    @client.get_tokens_from_refresh_token(
       client_id: client_id,
-      auth_flow: "REFRESH_TOKEN_AUTH",
-      auth_parameters: { "REFRESH_TOKEN" => refresh_token },
+      refresh_token:,
     )
   end
 
