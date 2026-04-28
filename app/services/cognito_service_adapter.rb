@@ -70,7 +70,7 @@ class CognitoServiceAdapter
         refresh_token:,
       )
 
-      AuthenticationTokens.from_result(result)
+      return AuthenticationTokens.from_result(result)
     end
 
     result = initiate_refresh_token_auth(refresh_token).authentication_result
@@ -87,7 +87,7 @@ class CognitoServiceAdapter
   end
 
   def respond_to_custom_challenge(session:, username:, answer:)
-    @client.respond_to_auth_challenge(
+    response = @client.respond_to_auth_challenge(
       client_id: client_id,
       challenge_name: "CUSTOM_CHALLENGE",
       session:,
@@ -96,6 +96,9 @@ class CognitoServiceAdapter
         "ANSWER" => answer,
       },
     )
+
+    result = response.authentication_result
+    AuthenticationTokens.from_result(result)
   end
 
   def create_user_pool_client(client_name:, scopes:)

@@ -12,7 +12,7 @@ class TokenService
       session:,
       username:,
       answer:,
-    ).authentication_result
+    )
   end
 
   def verify_email(username)
