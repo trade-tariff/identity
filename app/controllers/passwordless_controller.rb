@@ -42,12 +42,12 @@ class PasswordlessController < ApplicationController
     end
 
     token_service = TokenService.new
-    result = token_service.exchange_challenge(session: auth, username: email, answer: token)
+    tokens = token_service.exchange_challenge(session: auth, username: email, answer: token)
 
     # Set email as verified
     token_service.verify_email(email)
 
-    set_cookies(result)
+    set_cookies(tokens)
 
     redirect_to current_consumer.success_url, allow_other_host: true
   rescue Aws::CognitoIdentityProvider::Errors::NotAuthorizedException

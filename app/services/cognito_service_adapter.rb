@@ -1,4 +1,13 @@
 class CognitoServiceAdapter
+  AuthenticationTokens = Struct.new(:id_token, :refresh_token, keyword_init: true) do
+    def self.from_result(result)
+      new(
+        id_token: result.id_token,
+        refresh_token: result.refresh_token,
+      )
+    end
+  end
+
   def initialize
     @client = TradeTariffIdentity.cognito_client
     @user_pool_id = TradeTariffIdentity.cognito_user_pool_id
@@ -54,6 +63,20 @@ class CognitoServiceAdapter
     )
   end
 
+  def refresh_tokens(refresh_token)
+    if @client.respond_to?(:get_tokens_from_refresh_token)
+      result = @client.get_tokens_from_refresh_token(
+        client_id: client_id,
+        refresh_token:,
+      )
+
+      return AuthenticationTokens.from_result(result)
+    end
+
+    result = initiate_refresh_token_auth(refresh_token).authentication_result
+    AuthenticationTokens.from_result(result)
+  end
+
   def initiate_custom_auth(username)
     @client.admin_initiate_auth(
       user_pool_id: @user_pool_id,
@@ -64,7 +87,7 @@ class CognitoServiceAdapter
   end
 
   def respond_to_custom_challenge(session:, username:, answer:)
-    @client.respond_to_auth_challenge(
+    response = @client.respond_to_auth_challenge(
       client_id: client_id,
       challenge_name: "CUSTOM_CHALLENGE",
       session:,
@@ -73,6 +96,9 @@ class CognitoServiceAdapter
         "ANSWER" => answer,
       },
     )
+
+    result = response.authentication_result
+    AuthenticationTokens.from_result(result)
   end
 
   def create_user_pool_client(client_name:, scopes:)
