@@ -4,7 +4,7 @@ class TokenService
   end
 
   def refresh(refresh_token)
-    @cognito.initiate_refresh_token_auth(refresh_token).authentication_result
+    @cognito.refresh_tokens(refresh_token)
   end
 
   def exchange_challenge(session:, username:, answer:)

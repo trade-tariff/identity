@@ -1,4 +1,13 @@
 class CognitoServiceAdapter
+  AuthenticationTokens = Struct.new(:id_token, :refresh_token, keyword_init: true) do
+    def self.from_result(result)
+      new(
+        id_token: result.id_token,
+        refresh_token: result.refresh_token,
+      )
+    end
+  end
+
   def initialize
     @client = TradeTariffIdentity.cognito_client
     @user_pool_id = TradeTariffIdentity.cognito_user_pool_id
@@ -52,6 +61,20 @@ class CognitoServiceAdapter
       auth_flow: "REFRESH_TOKEN_AUTH",
       auth_parameters: { "REFRESH_TOKEN" => refresh_token },
     )
+  end
+
+  def refresh_tokens(refresh_token)
+    if @client.respond_to?(:get_tokens_from_refresh_token)
+      result = @client.get_tokens_from_refresh_token(
+        client_id: client_id,
+        refresh_token:,
+      )
+
+      AuthenticationTokens.from_result(result)
+    end
+
+    result = initiate_refresh_token_auth(refresh_token).authentication_result
+    AuthenticationTokens.from_result(result)
   end
 
   def initiate_custom_auth(username)
