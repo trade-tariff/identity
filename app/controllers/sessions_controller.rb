@@ -39,8 +39,8 @@ private
     return false if cookies[refresh_token_cookie_name].blank?
 
     begin
-      result = TokenService.new.refresh(cookies[refresh_token_cookie_name])
-      set_cookies(result)
+      tokens = TokenService.new.refresh(cookies[refresh_token_cookie_name])
+      set_cookies(tokens)
       true
     rescue Aws::CognitoIdentityProvider::Errors::NotAuthorizedException
       clear_cookies

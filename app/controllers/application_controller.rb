@@ -16,19 +16,19 @@ class ApplicationController < ActionController::Base
     cookies.delete(refresh_token_cookie_name, domain: current_consumer.cookie_domain)
   end
 
-  def set_cookies(result)
-    return if result.blank?
+  def set_cookies(tokens)
+    return if tokens.blank?
 
     cookies[id_token_cookie_name] = {
-      value: encrypted(result.id_token),
+      value: encrypted(tokens.id_token),
       httponly: true,
       domain: current_consumer.cookie_domain,
       expires: COOKIE_DURATION.from_now,
     }
 
-    if result.refresh_token.present?
+    if tokens.refresh_token.present?
       cookies[refresh_token_cookie_name] = {
-        value: result.refresh_token,
+        value: tokens.refresh_token,
         httponly: true,
         domain: current_consumer.cookie_domain,
         expires: COOKIE_DURATION.from_now,

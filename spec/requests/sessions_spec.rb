@@ -72,9 +72,19 @@ RSpec.describe "Sessions", type: :request do
       end
 
       it "refreshes the session and redirects to the consumer's success URL when existing session is expired" do
+        rotated = Struct.new(:id_token, :refresh_token).new("new_id_token", "new_refresh_token")
         allow(CognitoTokenVerifier).to receive(:call).and_return(:expired)
+        allow(cognito).to receive(:get_tokens_from_refresh_token).and_return(Struct.new(:authentication_result).new(rotated))
         get new_session_path, params: { consumer_id: consumer.id }
         expect(response).to redirect_to(success_url)
+      end
+
+      it "rotates refresh token cookie when existing session is expired" do
+        rotated = Struct.new(:id_token, :refresh_token).new("new_id_token", "new_refresh_token")
+        allow(CognitoTokenVerifier).to receive(:call).and_return(:expired)
+        allow(cognito).to receive(:get_tokens_from_refresh_token).and_return(Struct.new(:authentication_result).new(rotated))
+        get new_session_path, params: { consumer_id: consumer.id }
+        expect(cookies[:refresh_token]).to eq("new_refresh_token")
       end
 
       it "returns a successful response when there is no valid or expired session" do
