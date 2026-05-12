@@ -18,8 +18,8 @@
 
 | Name | Source | Version |
 | ---- | ------ | ------- |
-| <a name="module_identity-job"></a> [identity-job](#module\_identity-job) | git@github.com:trade-tariff/trade-tariff-platform-terraform-modules.git//aws/ecs-service | aws/ecs-service-v1.21.0 |
-| <a name="module_service"></a> [service](#module\_service) | git@github.com:trade-tariff/trade-tariff-platform-terraform-modules.git//aws/ecs-service | aws/ecs-service-v1.21.0 |
+| <a name="module_identity-job"></a> [identity-job](#module\_identity-job) | <git@github.com>:trade-tariff/trade-tariff-platform-terraform-modules.git//aws/ecs-service | aws/ecs-service-v1.21.0 |
+| <a name="module_service"></a> [service](#module\_service) | <git@github.com>:trade-tariff/trade-tariff-platform-terraform-modules.git//aws/ecs-service | aws/ecs-service-v1.21.0 |
 
 ## Resources
 
