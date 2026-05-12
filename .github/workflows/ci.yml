@@ -36,6 +36,8 @@ jobs:
         with:
           ssh-key: ${{ secrets.PRIVATE_SSH_KEY }}
       - uses: trade-tariff/trade-tariff-tools/.github/actions/setup-terraform-docs@main
+        with:
+          terraform_docs_version: 0.22.0
       - run: cd terraform/ && terraform init -backend=false -reconfigure
       - run: pip install pre-commit
       - run: pre-commit run --all-files
