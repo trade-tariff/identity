@@ -59,6 +59,7 @@
             lint
             pre-commit
             ruby
+            terraform-docs
             update-providers
           ];
         };
