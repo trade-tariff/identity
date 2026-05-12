@@ -22,20 +22,19 @@ repos:
         files: '.env.development|.env.test'
 
   - repo: https://github.com/trufflesecurity/trufflehog
-    rev: v3.93.7
+    rev: v3.95.3
     hooks:
       - id: trufflehog
 
   - repo: https://github.com/igorshubovych/markdownlint-cli
     rev: v0.48.0
     hooks:
-      - id: markdownlint-docker
+      - id: markdownlint-fix
         args:
           - "--ignore"
           - terraform
           - "--ignore"
           - .github
-          - "--fix"
 
   - repo: https://github.com/mattlqx/pre-commit-ruby
     rev: v1.3.6
@@ -44,6 +43,6 @@ repos:
         args: ["--autocorrect"]
 
   - repo: https://github.com/rhysd/actionlint.git
-    rev: v1.7.11
+    rev: v1.7.12
     hooks:
       - id: actionlint-docker
