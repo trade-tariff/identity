@@ -55,3 +55,9 @@ variable "scale_out_cooldown" {
   type        = number
   default     = 60
 }
+
+variable "enable_cognito_app_client_count_monitor" {
+  description = "When true, deploy Lambda + alarm for Cognito user pool app client count (threshold 800)."
+  type        = bool
+  default     = true
+}

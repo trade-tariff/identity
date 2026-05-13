@@ -7,3 +7,5 @@ min_capacity  = 1
 max_capacity  = 3
 
 enable_alarms = false
+
+enable_cognito_app_client_count_monitor = true
