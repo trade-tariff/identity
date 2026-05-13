@@ -1,5 +1,5 @@
 module "service" {
-  source = "git@github.com:trade-tariff/trade-tariff-platform-terraform-modules.git//aws/ecs-service?ref=aws/ecs-service-v1.21.0"
+  source = "git@github.com:trade-tariff/trade-tariff-platform-terraform-modules.git//aws/ecs-service?ref=aws/ecs-service-v3.0.2"
 
   region = var.region
 
@@ -28,7 +28,23 @@ module "service" {
 
   enable_ecs_exec = true
 
-  has_autoscaler = local.has_autoscaler
-  min_capacity   = var.min_capacity
-  max_capacity   = var.max_capacity
+  min_capacity       = var.min_capacity
+  max_capacity       = var.max_capacity
+  has_autoscaler     = local.has_autoscaler
+  scale_in_cooldown  = var.scale_in_cooldown
+  scale_out_cooldown = var.scale_out_cooldown
+
+  autoscaling_metrics = {
+    cpu = {
+      metric_type  = "ECSServiceAverageCPUUtilization"
+      target_value = 30
+    }
+    memory = {
+      metric_type  = "ECSServiceAverageMemoryUtilization"
+      target_value = 50
+    }
+  }
+
+  enable_alarms       = var.enable_alarms
+  cpu_alarm_threshold = 85 # Temporarily set higher to avoid alarm noise during deployments, will be adjusted based on observed metrics after testing is complete.
 }

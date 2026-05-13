@@ -43,3 +43,29 @@ When the user is redirected to the service, a Cognito JWT is set as a cookie
 called `id_token` which contains the user's details. In non-development
 environments the token is encrypted using `ENCRYPTION_SECRET`. This needs to
 be shared with the consuming service.
+
+<!-- BEGIN_TF_DOCS -->
+## Requirements
+
+No requirements.
+
+## Providers
+
+No providers.
+
+## Modules
+
+No modules.
+
+## Resources
+
+No resources.
+
+## Inputs
+
+No inputs.
+
+## Outputs
+
+No outputs.
+<!-- END_TF_DOCS -->
