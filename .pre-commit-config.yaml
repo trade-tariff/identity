@@ -21,10 +21,16 @@ repos:
       - id: file-contents-sorter
         files: '.env.development|.env.test'
 
-  - repo: https://github.com/trufflesecurity/trufflehog
-    rev: v3.95.3
+  - repo: local
     hooks:
       - id: trufflehog
+        name: TruffleHog
+        description: Detect secrets in your repo
+        entry: bash -c '.github/bin/trufflehog'
+        language: system
+        pass_filenames: false
+        require_serial: true
+        stages: ["pre-commit", "pre-push"]
 
   - repo: https://github.com/igorshubovych/markdownlint-cli
     rev: v0.48.0

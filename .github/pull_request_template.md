@@ -8,6 +8,7 @@
 <!-- Link to the relevant Jira/ticket, or 'N/A' if not applicable -->
 
 ## Risk:
+
 **Risk level:** 🟢 / 🟠 / 🔴 <!-- delete as appropriate -->
 
 **Reason for rating:**
@@ -27,6 +28,7 @@ Rate the overall risk of deploying this change:
 
 🟢 GREEN – things that are typically low risk:
 ───────────────────────────────────────────────────
+
 - New tests or improved test coverage with no production code changes
 - Dependency bumps with no API changes (minor/patch gems)
 - Copy changes to sign-in UI (labels, hint text, error messages) with no logic change
@@ -38,6 +40,7 @@ Rate the overall risk of deploying this change:
 
 🟠 AMBER – things that need a team conversation first:
 ───────────────────────────────────────────────────
+
 - Changes to session handling, cookie attributes, or token lifetimes
 - Modifications to the sign-in or sign-out flow (redirects, callbacks, error paths)
 - Changes to how user attributes or claims are mapped, stored, or forwarded to downstream services
@@ -50,6 +53,7 @@ Rate the overall risk of deploying this change:
 
 🔴 RED – requires explicit approval from Thor or Neil:
 ───────────────────────────────────────────────────
+
 - Any change to password hashing, token signing, or cryptographic primitives
 - Modifications to MFA logic, step-up authentication, or account recovery flows
 - Changes to how user accounts are created, merged, suspended, or deleted
