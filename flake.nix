@@ -20,7 +20,7 @@
         rubyVersion = builtins.head (builtins.split "\n" (builtins.readFile ./.ruby-version));
         ruby = pkgs."ruby-${rubyVersion}";
 
-        # Worktree detection hook (partial for Bundler + pre-commit)
+        # Worktree detection hook (Bundler + pre-commit isolation)
         worktree = rec {
           isWorktree = ''
             if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
@@ -89,10 +89,7 @@
           rm -rf "$HOME/.local/share/gem/worktrees/$WT_ID" 2>/dev/null || true
           rm -rf "$HOME/.cache/bundle/worktrees/$WT_ID" 2>/dev/null || true
 
-          # Clean Rails generated files for cleanliness
-          rm -rf tmp/ log/ 2>/dev/null || true
-
-          echo "Worktree $WT_ID cleaned (bundle + gem + Rails tmp)."
+          echo "Worktree $WT_ID cleaned (bundle + gem)."
         '';
       in
       {
@@ -103,6 +100,8 @@
               WT_ID=$(${worktree.id})
               export GEM_HOME="$HOME/.local/share/gem/worktrees/$WT_ID"
               export BUNDLE_PATH=".bundle"
+              export BUNDLE_APP_CONFIG=".bundle"
+              export BUNDLE_IGNORE_CONFIG=1
               mkdir -p "$GEM_HOME" ".bundle"
               echo "Worktree Bundler isolation enabled (ID: $WT_ID)"
             else
@@ -115,14 +114,9 @@
             }"
 
             export GEM_PATH=$GEM_HOME
-            export PATH=$GEM_HOME/bin:$PATH
+            export PATH=${ruby}/bin:$GEM_HOME/bin:$PATH
 
             ${worktree-info}/bin/worktree-info
-
-            # Ensure pre-commit hooks are installed
-            if command -v pre-commit >/dev/null 2>&1; then
-              pre-commit install --install-hooks 2>/dev/null || true
-            fi
 
             # === Automatic first-time setup for identity worktrees ===
             if [ "$(${worktree.isWorktree})" = "true" ]; then
@@ -132,16 +126,47 @@
               if [ ! -f "$MARKER" ]; then
                 echo ""
                 echo "==> First time in this worktree (ID: $WT_ID)"
-                echo "    Running bundle install + bin/rails db:prepare..."
+                echo "    Running bundle install + pre-commit install..."
                 echo ""
 
-                bundle install 2>&1 | tail -5 || true
-                bin/rails db:prepare 2>&1 | tail -5 || true
+                fail_worktree_setup() {
+                  echo ""
+                  echo "==> Worktree setup failed. Fix the error above, then re-enter the shell."
+                  exit 1
+                }
+
+                run_setup_step() {
+                  label="$1"
+                  shift
+                  log_file="/tmp/worktree-$WT_ID-$(echo "$label" | tr '[:upper:] /:' '[:lower:]---').log"
+
+                  echo "    $label..."
+                  if "$@" >"$log_file" 2>&1; then
+                    echo "      ok (log: $log_file)"
+                  else
+                    status=$?
+                    echo "      failed with exit $status (log: $log_file)"
+                    echo "      last 80 log lines:"
+                    tail -80 "$log_file" | sed 's/^/        /'
+                    return "$status"
+                  fi
+                }
+
+                rm -rf .bundle
+                export BUNDLE_PATH=".bundle"
+                export BUNDLE_APP_CONFIG=".bundle"
+                export BUNDLE_IGNORE_CONFIG=1
+                run_setup_step "Installing gems" bundle install --jobs=4 --retry=3 || fail_worktree_setup
+                run_setup_step "Installing pre-commit hooks" pre-commit install --install-hooks || fail_worktree_setup
 
                 touch "$MARKER"
                 echo ""
                 echo "==> Identity ready."
                 echo ""
+              else
+                export BUNDLE_PATH=".bundle"
+                export BUNDLE_APP_CONFIG=".bundle"
+                export BUNDLE_IGNORE_CONFIG=1
               fi
             fi
           '';
