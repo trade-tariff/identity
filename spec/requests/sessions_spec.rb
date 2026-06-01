@@ -53,8 +53,8 @@ RSpec.describe "Sessions", type: :request do
       let(:consumer) { build(:consumer, success_url:) }
       let(:success_url) { "http://example.com/success" }
       let(:cognito) { instance_double(Aws::CognitoIdentityProvider::Client, admin_initiate_auth: cognito_auth_object) }
-      let(:authentication_result) { Struct.new(:id_token, :refresh_token).new("id_token", "refresh_token") }
-      let(:cognito_auth_object) { Struct.new(:authentication_result).new(authentication_result) }
+      let(:authentication_result) { Data.define(:id_token, :refresh_token).new("id_token", "refresh_token") }
+      let(:cognito_auth_object) { Data.define(:authentication_result).new(authentication_result) }
 
       before do
         allow(Consumer).to receive(:load).with(consumer.id).and_return(consumer)
@@ -72,17 +72,17 @@ RSpec.describe "Sessions", type: :request do
       end
 
       it "refreshes the session and redirects to the consumer's success URL when existing session is expired" do
-        rotated = Struct.new(:id_token, :refresh_token).new("new_id_token", "new_refresh_token")
+        rotated = Data.define(:id_token, :refresh_token).new("new_id_token", "new_refresh_token")
         allow(CognitoTokenVerifier).to receive(:call).and_return(:expired)
-        allow(cognito).to receive(:get_tokens_from_refresh_token).and_return(Struct.new(:authentication_result).new(rotated))
+        allow(cognito).to receive(:get_tokens_from_refresh_token).and_return(Data.define(:authentication_result).new(rotated))
         get new_session_path, params: { consumer_id: consumer.id }
         expect(response).to redirect_to(success_url)
       end
 
       it "rotates refresh token cookie when existing session is expired" do
-        rotated = Struct.new(:id_token, :refresh_token).new("new_id_token", "new_refresh_token")
+        rotated = Data.define(:id_token, :refresh_token).new("new_id_token", "new_refresh_token")
         allow(CognitoTokenVerifier).to receive(:call).and_return(:expired)
-        allow(cognito).to receive(:get_tokens_from_refresh_token).and_return(Struct.new(:authentication_result).new(rotated))
+        allow(cognito).to receive(:get_tokens_from_refresh_token).and_return(Data.define(:authentication_result).new(rotated))
         get new_session_path, params: { consumer_id: consumer.id }
         expect(cookies[:refresh_token]).to eq("new_refresh_token")
       end
