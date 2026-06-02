@@ -3,7 +3,7 @@ require "rails_helper"
 RSpec.describe "Passwordless", type: :request do
   let(:cognito) { instance_double(Aws::CognitoIdentityProvider::Client) }
   let(:consumer) { build(:consumer) }
-  let(:cognito_auth_object) { Struct.new(:session).new("session") }
+  let(:cognito_auth_object) { Data.define(:session).new("session") }
   let(:email) { "test@email.com" }
 
   before do
@@ -92,8 +92,8 @@ RSpec.describe "Passwordless", type: :request do
   describe "GET /callback" do
     context "when link is correct and used in a timely manner" do
       let(:consumer) { build(:consumer) }
-      let(:authentication_result) { Struct.new(:id_token, :refresh_token).new("id_token", "refresh_token") }
-      let(:cognito_auth_object) { Struct.new(:authentication_result).new(authentication_result) }
+      let(:authentication_result) { Data.define(:id_token, :refresh_token).new("id_token", "refresh_token") }
+      let(:cognito_auth_object) { Data.define(:authentication_result).new(authentication_result) }
 
       before do
         post passwordless_path, params: { email: }
