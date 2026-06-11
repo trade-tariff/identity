@@ -6,24 +6,16 @@
 <p class="govuk-body">You must follow the link in the email to verify your email address.</p>
 <div class="govuk-inset-text">The link will stop working after 15 minutes.</div>
 
-<details class="govuk-details">
-  <summary class="govuk-details__summary">
-    <span class="govuk-details__summary-text">
-      Not received an email?
-    </span>
-  </summary>
+<%= govuk_details(summary_text: "Not received an email?") do %>
+  <p class="govuk-body">
+    Emails sometimes take a few minutes to arrive.
+  </p>
 
-  <div class="govuk-details__text">
-    <p class="govuk-body">
-      Emails sometimes take a few minutes to arrive.
-    </p>
+  <p class="govuk-body">
+    If you do not receive an email soon, check your spam or junk folder.
+  </p>
 
-    <p class="govuk-body">
-      If you do not receive an email soon, check your spam or junk folder.
-    </p>
-
-    <p class="govuk-body">
-      If this does not work, <a class="govuk-link" href="mailto:tariffmanagement@hmrc.gov.uk">contact us</a> for help.
-    </p>
-  </div>
-</details>
+  <p class="govuk-body">
+    If this does not work, <%= govuk_link_to "contact us", "mailto:tariffmanagement@hmrc.gov.uk" %> for help.
+  </p>
+<% end %>
