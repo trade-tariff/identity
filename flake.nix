@@ -118,6 +118,7 @@
               stages = [ "pre-commit" ];
             };
             nixfmt-rfc-style = {
+              package = pkgs.nixfmt;
               enable = true;
               stages = [ "pre-commit" ];
             };
