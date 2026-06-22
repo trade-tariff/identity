@@ -28,11 +28,10 @@ RSpec.describe "Passwordless", type: :request do
       expect(cognito).to have_received(:admin_create_user)
     end
 
-    it "adds the user to the consumer's group" do
-      post passwordless_path, params: { passwordless_form: { email: } }
-      expect(cognito).to have_received(:admin_add_user_to_group).with(
-        hash_including(group_name: consumer.id),
-      )
+    it "enqueues a job to add the user to the consumer's group" do
+      expect {
+        post passwordless_path, params: { passwordless_form: { email: } }
+      }.to have_enqueued_job(AddUserToConsumerGroupJob).with(email, consumer.id)
     end
 
     it "initiates auth with auth params" do

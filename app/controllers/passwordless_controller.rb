@@ -11,7 +11,7 @@ class PasswordlessController < ApplicationController
     email = @passwordless.email
 
     find_or_create_user(email)
-    add_user_to_consumer_group(email)
+    AddUserToConsumerGroupJob.perform_later(email, current_consumer.id)
 
     resp = initiate_passwordless_auth(email)
 
@@ -63,10 +63,6 @@ private
     cognito.find_user(email)
   rescue Aws::CognitoIdentityProvider::Errors::UserNotFoundException
     cognito.create_user(email, email:)
-  end
-
-  def add_user_to_consumer_group(email)
-    cognito.add_to_group(email, group_name: current_consumer.id)
   end
 
   def initiate_passwordless_auth(email)
