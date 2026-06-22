@@ -5,6 +5,7 @@ class SessionsController < ApplicationController
 
   def index
     session[:consumer_id] = current_consumer.id
+    session[:return_to] = safe_return_to if safe_return_to.present?
     redirect_to login_path
   end
 
@@ -25,10 +26,10 @@ private
   def check_session
     case CognitoTokenVerifier.call(cookies[id_token_cookie_name], current_consumer)
     when :valid
-      redirect_to current_consumer.success_url, allow_other_host: true and return
+      redirect_to success_url, allow_other_host: true and return
     when :expired
       if refresh_session_with_token
-        redirect_to current_consumer.success_url, allow_other_host: true and return
+        redirect_to success_url, allow_other_host: true and return
       end
     when :invalid
       clear_cookies

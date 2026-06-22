@@ -126,6 +126,15 @@ RSpec.describe "Passwordless", type: :request do
         get callback_passwordless_path, params: { email:, token: "token" }
         expect(response).to redirect_to(consumer.success_url)
       end
+
+      it "redirects to the consumer's success URL with the stored return URL" do
+        get root_path, params: { consumer_id: consumer.id, return_to: "/subscriptions/mycommodities?as_of=2025-06-20" }
+        post passwordless_path, params: { passwordless_form: { email: } }
+
+        get callback_passwordless_path, params: { email:, token: "token" }
+
+        expect(response).to redirect_to("#{consumer.success_url}?return_to=%2Fsubscriptions%2Fmycommodities%3Fas_of%3D2025-06-20")
+      end
     end
 
     context "when link id invalid" do
