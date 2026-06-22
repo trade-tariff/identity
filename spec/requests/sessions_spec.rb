@@ -27,6 +27,21 @@ RSpec.describe "Sessions", type: :request do
         expect(session[:consumer_id]).to eq(consumer.id)
       end
 
+      it "stores a relative return URL in the session" do
+        get sessions_path, params: { consumer_id: consumer.id, return_to: "/subscriptions/mycommodities?as_of=2025-06-20" }
+        expect(session[:return_to]).to eq("/subscriptions/mycommodities?as_of=2025-06-20")
+      end
+
+      it "does not store an absolute return URL in the session" do
+        get sessions_path, params: { consumer_id: consumer.id, return_to: "https://example.com/phishing" }
+        expect(session[:return_to]).to be_nil
+      end
+
+      it "does not store a protocol-relative return URL in the session" do
+        get sessions_path, params: { consumer_id: consumer.id, return_to: "//example.com/phishing" }
+        expect(session[:return_to]).to be_nil
+      end
+
       it "prioritizes params consumer_id over session consumer_id", :aggregate_failures do
         allow(Consumer).to receive(:load).with(stale_consumer.id).and_return(stale_consumer)
 

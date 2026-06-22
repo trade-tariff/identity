@@ -49,7 +49,7 @@ class PasswordlessController < ApplicationController
 
     set_cookies(tokens)
 
-    redirect_to current_consumer.success_url, allow_other_host: true
+    redirect_to success_url, allow_other_host: true
   rescue Aws::CognitoIdentityProvider::Errors::NotAuthorizedException
     redirect_to current_consumer.failure_url, allow_other_host: true
   rescue StandardError => e
