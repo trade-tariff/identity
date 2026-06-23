@@ -1,0 +1,26 @@
+# Debride cannot see framework convention calls reliably.
+# This normalized baseline is compared by trade-tariff-tools/debride.
+
+Api::ClientCredentialsController#cognito_service_error
+Api::ClientCredentialsController#create
+Api::ClientCredentialsController#invalid_parameter
+Api::UsersController#show
+ApplicationHelper#page_title
+Consumer#cookie_domain=
+Consumer#failure_url=
+Consumer#id=
+Consumer#methods=
+Consumer#success_url=
+ErrorsController#bad_request
+ErrorsController#internal_server_error
+ErrorsController#not_found
+HealthcheckController#check
+HealthcheckController#checkz
+PasswordlessController#callback
+PasswordlessController#create
+PasswordlessController#show
+PasswordlessForm#email=
+SessionsController#index
+SessionsController#new
+User#email=
+User#username=
