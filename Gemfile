@@ -27,6 +27,7 @@ group :development do
 end
 
 group :test do
+  gem "debride", "~> 1.15", require: false
   gem "factory_bot_rails"
   gem "rspec-rails"
   gem "simplecov"
