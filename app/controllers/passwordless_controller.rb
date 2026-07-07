@@ -1,6 +1,8 @@
 class PasswordlessController < ApplicationController
   include TokenEncryption
 
+  RESEND_COOLDOWN = 30.seconds
+
   def create
     @passwordless = PasswordlessForm.new(permitted_params)
 
@@ -35,6 +37,10 @@ class PasswordlessController < ApplicationController
 
   def verify
     @email = session[:email]
+    if @email.nil? || session[:login].nil?
+      redirect_to login_path and return
+    end
+
     @passwordless_code = PasswordlessCodeForm.new(permitted_code_params)
 
     unless @passwordless_code.valid?
@@ -64,8 +70,13 @@ class PasswordlessController < ApplicationController
       redirect_to login_path and return
     end
 
+    if resend_on_cooldown?
+      redirect_to passwordless_path, alert: "Please wait a short while before requesting another code." and return
+    end
+
     resp = initiate_passwordless_auth(email)
     session[:login] = resp.session
+    session[:last_resend_at] = Time.current.to_i
 
     redirect_to passwordless_path, notice: "We've sent you a new code."
   rescue StandardError => e
@@ -93,6 +104,11 @@ private
 
   def initiate_passwordless_auth(email)
     cognito.initiate_custom_auth(email)
+  end
+
+  def resend_on_cooldown?
+    last_resend_at = session[:last_resend_at]
+    last_resend_at.present? && Time.current.to_i < last_resend_at + RESEND_COOLDOWN
   end
 
   def permitted_params

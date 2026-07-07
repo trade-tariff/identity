@@ -195,6 +195,18 @@ RSpec.describe "Passwordless", type: :request do
         expect(response).to redirect_to(consumer.failure_url)
       end
     end
+
+    context "when there is no passwordless session (stale or direct request)" do
+      it "redirects to login_path without calling Cognito", :aggregate_failures do
+        reset!
+        allow(cognito).to receive(:respond_to_auth_challenge)
+
+        post verify_passwordless_path, params: { passwordless_code_form: { code: "123456" } }
+
+        expect(response).to redirect_to(login_path)
+        expect(cognito).not_to have_received(:respond_to_auth_challenge)
+      end
+    end
   end
 
   describe "POST /resend" do
@@ -225,6 +237,24 @@ RSpec.describe "Passwordless", type: :request do
         reset!
         post resend_passwordless_path
         expect(response).to redirect_to(login_path)
+      end
+    end
+
+    context "when a resend was requested less than 30 seconds ago" do
+      it "does not re-initiate auth a second time" do
+        post resend_passwordless_path
+        post resend_passwordless_path
+
+        expect(cognito).to have_received(:admin_initiate_auth).twice # 1 from the outer create, 1 from the first resend
+      end
+
+      it "redirects with a cooldown message", :aggregate_failures do
+        post resend_passwordless_path
+        post resend_passwordless_path
+
+        expect(response).to redirect_to(passwordless_path)
+        follow_redirect!
+        expect(response.body).to include("wait a short while")
       end
     end
   end
