@@ -1,19 +1,32 @@
-<% page_title "Check your email" %>
+<% page_title "Enter your code" %>
 
-<h1 class="govuk-heading-l">Check your email</h1>
+<h1 class="govuk-heading-l">Enter your code</h1>
 
-<p class="govuk-body">An email has been sent to <strong><%= @email %></strong></p>
-<p class="govuk-body">You must follow the link in the email to verify your email address.</p>
-<div class="govuk-inset-text">The link will stop working after 15 minutes.</div>
+<p class="govuk-body">We've sent a 6-digit code to <strong><%= @email %></strong></p>
+<div class="govuk-inset-text">The code will stop working after 15 minutes.</div>
 
-<%= govuk_details(summary_text: "Not received an email?") do %>
+<%= form_with model: @passwordless_code, url: verify_passwordless_path, local: true, html: { autocomplete: "off" } do |f| %>
+  <%= f.govuk_error_summary %>
+
+  <%= f.govuk_text_field :code,
+        label: { text: "6-digit code" },
+        width: 5,
+        autocomplete: "one-time-code",
+        inputmode: "numeric" %>
+
+  <%= f.govuk_submit "Continue" %>
+<% end %>
+
+<%= govuk_details(summary_text: "Not received a code?") do %>
   <p class="govuk-body">
     Emails sometimes take a few minutes to arrive.
   </p>
 
   <p class="govuk-body">
-    If you do not receive an email soon, check your spam or junk folder.
+    If you do not receive a code soon, check your spam or junk folder.
   </p>
+
+  <%= button_to "Resend code", resend_passwordless_path, method: :post, class: "govuk-button govuk-button--secondary" %>
 
   <p class="govuk-body">
     If this does not work, <%= govuk_link_to "contact us", "mailto:tariffmanagement@hmrc.gov.uk" %> for help.
