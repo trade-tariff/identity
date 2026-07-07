@@ -10,11 +10,29 @@
 <%= form_with model: @passwordless_code, url: verify_passwordless_path, local: true, html: { autocomplete: "off" } do |f| %>
   <%= f.govuk_error_summary %>
 
-  <%= f.govuk_text_field :code,
-        label: { text: "6-digit code" },
-        width: 5,
-        autocomplete: "one-time-code",
-        inputmode: "numeric" %>
+  <% has_error = @passwordless_code.errors[:code].any? %>
+  <div class="govuk-form-group<%= ' govuk-form-group--error' if has_error %>">
+    <label class="govuk-label" for="passwordless_code_form_code">6-digit code</label>
+    <% if has_error %>
+      <p class="govuk-error-message" id="passwordless-code-form-code-error">
+        <span class="govuk-visually-hidden">Error:</span> <%= @passwordless_code.errors[:code].first %>
+      </p>
+    <% end %>
+    <div class="otp-input<%= ' otp-input--error' if has_error %>"
+         data-otp-input
+         <%= 'aria-describedby="passwordless-code-form-code-error"'.html_safe if has_error %>>
+      <input class="govuk-input otp-input__box<%= ' govuk-input--error' if has_error %>"
+             type="text" id="passwordless_code_form_code"
+             inputmode="numeric" maxlength="1" pattern="[0-9]"
+             autocomplete="one-time-code" aria-label="Digit 1 of 6" data-otp-box>
+      <% (2..6).each do |i| %>
+        <input class="govuk-input otp-input__box<%= ' govuk-input--error' if has_error %>"
+               type="text" inputmode="numeric" maxlength="1" pattern="[0-9]"
+               aria-label="Digit <%= i %> of 6" data-otp-box>
+      <% end %>
+      <input type="hidden" name="passwordless_code_form[code]" data-otp-value>
+    </div>
+  </div>
 
   <%= f.govuk_submit "Continue" %>
 <% end %>
