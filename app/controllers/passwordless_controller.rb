@@ -19,8 +19,8 @@ class PasswordlessController < ApplicationController
     session[:login] = resp.session
 
     redirect_to passwordless_path
-  rescue StandardError => e
-    Rails.logger.error(e)
+  rescue Aws::Errors::ServiceError => e
+    Rails.logger.error(e.full_message)
     redirect_to login_path, alert: "Something went wrong. Please try again."
   end
 
@@ -52,8 +52,8 @@ class PasswordlessController < ApplicationController
     redirect_to success_url, allow_other_host: true
   rescue Aws::CognitoIdentityProvider::Errors::NotAuthorizedException
     redirect_to current_consumer.failure_url, allow_other_host: true
-  rescue StandardError => e
-    Rails.logger.error(e)
+  rescue Aws::Errors::ServiceError => e
+    Rails.logger.error(e.full_message)
     redirect_to current_consumer.failure_url, allow_other_host: true
   end
 
