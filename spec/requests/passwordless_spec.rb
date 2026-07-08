@@ -96,11 +96,12 @@ RSpec.describe "Passwordless", type: :request do
       let(:cognito_auth_object) { Data.define(:authentication_result).new(authentication_result) }
 
       before do
-        allow(cognito).to receive(:admin_initiate_auth).and_return(Data.define(:session).new("session"))
+        allow(cognito).to receive_messages(
+          admin_initiate_auth: Data.define(:session).new("session"),
+          respond_to_auth_challenge: cognito_auth_object,
+          admin_update_user_attributes: nil,
+        )
         post passwordless_path, params: { passwordless_form: { email: } }
-
-        allow(cognito).to receive(:respond_to_auth_challenge).and_return(cognito_auth_object)
-        allow(cognito).to receive(:admin_update_user_attributes)
       end
 
       it "responds to auth challenge" do
