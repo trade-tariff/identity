@@ -83,4 +83,30 @@ RSpec.describe "Errors", type: :request do
       end
     end
   end
+
+  describe "GET /internal_server_error" do
+    context "when html format is requested" do
+      it "renders the error template with expected text" do
+        get "/500", headers: { "Accept" => "text/html" }
+        expect(response.body).to include("Internal server error")
+      end
+
+      it "responds with a 500 status" do
+        get "/500", headers: { "Accept" => "text/html" }
+        expect(response).to have_http_status(:internal_server_error)
+      end
+    end
+
+    context "when non-html format is requested" do
+      it "renders a plain text response" do
+        get "/500", headers: { "Accept" => "application/json" }
+        expect(response.body).to eq("Internal server error")
+      end
+
+      it "responds with a 500 status" do
+        get "/500", headers: { "Accept" => "application/json" }
+        expect(response).to have_http_status(:internal_server_error)
+      end
+    end
+  end
 end
