@@ -36,4 +36,4 @@
 .envrc
 /.pre-commit-config-nix.yaml
 
-/vendor
+/vendor/bundle
