@@ -14,6 +14,12 @@ RSpec.describe EncryptionService, type: :service do
     end
   end
 
+  describe ".encryptor" do
+    it "returns the same instance on repeated calls" do
+      expect(described_class.encryptor).to be(described_class.encryptor)
+    end
+  end
+
   describe ".decrypt_string" do
     it "decrypts an encrypted string back to the original" do
       decrypted_string = described_class.decrypt_string(encrypted_string)
