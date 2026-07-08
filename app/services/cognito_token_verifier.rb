@@ -1,6 +1,11 @@
 class CognitoTokenVerifier
-  ISSUER = "https://cognito-idp.#{ENV['AWS_REGION']}.amazonaws.com/#{ENV['COGNITO_USER_POOL_ID']}".freeze
-  JWKS_URL = "#{ISSUER}/.well-known/jwks.json".freeze
+  def self.issuer
+    "https://cognito-idp.#{ENV['AWS_REGION']}.amazonaws.com/#{ENV['COGNITO_USER_POOL_ID']}"
+  end
+
+  def self.jwks_url
+    "#{issuer}/.well-known/jwks.json"
+  end
 
   def self.call(token, consumer)
     new(token, consumer).call
@@ -46,7 +51,7 @@ private
       JWT.decode(token_to_decode, nil, true,
                  algorithms: %w[RS256],
                  jwks: { keys: jwks_keys },
-                 iss: ISSUER,
+                 iss: self.class.issuer,
                  verify_iss: true)
     end
   end
@@ -62,7 +67,7 @@ private
 
   def fetch_jwks_keys
     Rails.cache.fetch("cognito_jwks_keys", expires_in: 1.hour) do
-      response = Faraday.get(JWKS_URL)
+      response = Faraday.get(self.class.jwks_url)
       JSON.parse(response.body)["keys"] if response.success?
     end
   end

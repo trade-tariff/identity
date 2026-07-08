@@ -1,10 +1,26 @@
 require "rails_helper"
 
 RSpec.describe CognitoTokenVerifier do
+  describe ".issuer" do
+    it "reflects the current AWS_REGION and COGNITO_USER_POOL_ID env vars" do
+      stub_const("ENV", ENV.to_hash.merge("AWS_REGION" => "eu-west-2", "COGNITO_USER_POOL_ID" => "pool-123"))
+
+      expect(described_class.issuer).to eq("https://cognito-idp.eu-west-2.amazonaws.com/pool-123")
+    end
+  end
+
+  describe ".jwks_url" do
+    it "reflects the current AWS_REGION and COGNITO_USER_POOL_ID env vars" do
+      stub_const("ENV", ENV.to_hash.merge("AWS_REGION" => "eu-west-2", "COGNITO_USER_POOL_ID" => "pool-123"))
+
+      expect(described_class.jwks_url).to eq("https://cognito-idp.eu-west-2.amazonaws.com/pool-123/.well-known/jwks.json")
+    end
+  end
+
   describe ".call" do
     let(:token) { "test-token" }
     let(:consumer) { build(:consumer, id: "myott") }
-    let(:jwks_url) { "https://cognito-idp.#{ENV['AWS_REGION']}.amazonaws.com/#{ENV['COGNITO_USER_POOL_ID']}/.well-known/jwks.json" }
+    let(:jwks_url) { described_class.jwks_url }
     let(:jwks_keys) { { "keys" => [{ "kty" => "RSA", "kid" => "test-kid", "use" => "sig" }] } }
     let(:decoded_token) { [{ "sub" => "1234567890", "email" => "test@example.com", "cognito:groups" => %w[myott] }] }
 
@@ -22,7 +38,7 @@ RSpec.describe CognitoTokenVerifier do
 
       it "verifies the token" do
         described_class.call(token, consumer)
-        expect(JWT).to have_received(:decode).with(token, nil, true, algorithms: %w[RS256], jwks: hash_including(:keys), iss: anything, verify_iss: true)
+        expect(JWT).to have_received(:decode).with(token, nil, true, algorithms: %w[RS256], jwks: hash_including(:keys), iss: described_class.issuer, verify_iss: true)
       end
     end
 
