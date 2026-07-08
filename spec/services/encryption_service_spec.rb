@@ -16,7 +16,8 @@ RSpec.describe EncryptionService, type: :service do
 
   describe ".encryptor" do
     it "returns the same instance on repeated calls" do
-      expect(described_class.encryptor).to be(described_class.encryptor)
+      first_call = described_class.encryptor
+      expect(described_class.encryptor).to be(first_call)
     end
   end
 
