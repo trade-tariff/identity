@@ -26,15 +26,13 @@ RSpec.describe RemoveUnverifiedUsers do
 
   subject(:service) do
     described_class.new(
-      client: client,
-      user_pool_id: user_pool_id,
+      adapter: adapter,
       group_id: group_id,
       cutoff_time: cutoff_time,
     )
   end
 
-  let(:client) { instance_double(Aws::CognitoIdentityProvider::Client) }
-  let(:user_pool_id) { "test-pool" }
+  let(:adapter) { instance_double(CognitoServiceAdapter) }
   let(:group_id) { "myott" }
   let(:cutoff_time) { 1.day.ago }
 
@@ -44,7 +42,7 @@ RSpec.describe RemoveUnverifiedUsers do
 
   context "when the user is older than one day and unverified" do
     before do
-      allow(client).to receive(:list_users).and_return(
+      allow(adapter).to receive(:list_users).and_return(
         stub_list_users_response(
           users: [build_user(age: 2.days.ago, username: "old_unverified", email_verified: "false")],
         ),
@@ -60,7 +58,7 @@ RSpec.describe RemoveUnverifiedUsers do
 
   context "when the user is old but verified" do
     before do
-      allow(client).to receive(:list_users).and_return(
+      allow(adapter).to receive(:list_users).and_return(
         stub_list_users_response(
           users: [build_user(age: 2.days.ago, username: "old_verified", email_verified: "true")],
         ),
@@ -76,7 +74,7 @@ RSpec.describe RemoveUnverifiedUsers do
 
   context "when the user is new and unverified" do
     before do
-      allow(client).to receive(:list_users).and_return(
+      allow(adapter).to receive(:list_users).and_return(
         stub_list_users_response(
           users: [build_user(age: 6.hours.ago, username: "new_unverified", email_verified: "false")],
         ),
@@ -92,7 +90,7 @@ RSpec.describe RemoveUnverifiedUsers do
 
   context "when Cognito returns multiple pages" do
     before do
-      allow(client).to receive(:list_users).and_return(
+      allow(adapter).to receive(:list_users).and_return(
         stub_list_users_response(
           users: [build_user(age: 2.days.ago, username: "old_unverified_1", email_verified: "false")],
           pagination_token: "next-token",
