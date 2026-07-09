@@ -62,11 +62,11 @@ RSpec.describe TradeTariffIdentity do
       before { allow(Rails.env).to receive(:development?).and_return(true) }
 
       it "returns true regardless of BYPASS_COGNITO" do
-        expect(described_class).to be_bypass_cognito
+        expect(described_class.bypass_cognito?).to be(true)
       end
     end
 
-    context "when Rails.env is not development and BYPASS_COGNITO is set" do
+    context 'when Rails.env is not development and BYPASS_COGNITO is "true"' do
       before do
         allow(Rails.env).to receive(:development?).and_return(false)
         ENV["BYPASS_COGNITO"] = "true"
@@ -74,8 +74,21 @@ RSpec.describe TradeTariffIdentity do
 
       after { ENV.delete("BYPASS_COGNITO") }
 
-      it "returns a truthy value" do
-        expect(described_class).to be_bypass_cognito
+      it "returns true" do
+        expect(described_class.bypass_cognito?).to be(true)
+      end
+    end
+
+    context 'when Rails.env is not development and BYPASS_COGNITO is set to a value other than "true"' do
+      before do
+        allow(Rails.env).to receive(:development?).and_return(false)
+        ENV["BYPASS_COGNITO"] = "1"
+      end
+
+      after { ENV.delete("BYPASS_COGNITO") }
+
+      it "returns false" do
+        expect(described_class.bypass_cognito?).to be(false)
       end
     end
 
@@ -85,8 +98,8 @@ RSpec.describe TradeTariffIdentity do
         ENV.delete("BYPASS_COGNITO")
       end
 
-      it "returns a falsey value" do
-        expect(described_class).not_to be_bypass_cognito
+      it "returns false" do
+        expect(described_class.bypass_cognito?).to be(false)
       end
     end
   end
