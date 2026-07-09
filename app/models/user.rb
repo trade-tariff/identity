@@ -7,7 +7,7 @@ class User
     begin
       user_response = cognito.find_user(username)
 
-      unless Rails.env.development?
+      unless TradeTariffIdentity.bypass_cognito?
         groups_response = cognito.list_user_groups(username)
 
         in_group = groups_response.groups.any? { |g| g.group_name == group }
@@ -27,7 +27,7 @@ class User
     cognito = CognitoServiceAdapter.new
 
     begin
-      unless Rails.env.development?
+      unless TradeTariffIdentity.bypass_cognito?
         cognito.remove_from_group(username, group_name: group)
       end
 

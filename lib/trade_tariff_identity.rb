@@ -17,7 +17,7 @@ module TradeTariffIdentity
     end
 
     def cookie_domain
-      return :all if Rails.env.development?
+      return :all if TradeTariffIdentity.bypass_cognito?
 
       ".#{ENV['MYOTT_COOKIE_DOMAIN']}"
     end
@@ -49,6 +49,10 @@ module TradeTariffIdentity
 
     def api_tokens
       JSON.parse(ENV.fetch("API_TOKENS", "{}"))
+    end
+
+    def bypass_cognito?
+      Rails.env.development? || ENV["BYPASS_COGNITO"]
     end
   end
 end

@@ -57,6 +57,40 @@ RSpec.describe TradeTariffIdentity do
     end
   end
 
+  describe ".bypass_cognito?" do
+    context "when Rails.env is development" do
+      before { allow(Rails.env).to receive(:development?).and_return(true) }
+
+      it "returns true regardless of BYPASS_COGNITO" do
+        expect(described_class).to be_bypass_cognito
+      end
+    end
+
+    context "when Rails.env is not development and BYPASS_COGNITO is set" do
+      before do
+        allow(Rails.env).to receive(:development?).and_return(false)
+        ENV["BYPASS_COGNITO"] = "true"
+      end
+
+      after { ENV.delete("BYPASS_COGNITO") }
+
+      it "returns a truthy value" do
+        expect(described_class).to be_bypass_cognito
+      end
+    end
+
+    context "when Rails.env is not development and BYPASS_COGNITO is not set" do
+      before do
+        allow(Rails.env).to receive(:development?).and_return(false)
+        ENV.delete("BYPASS_COGNITO")
+      end
+
+      it "returns a falsey value" do
+        expect(described_class).not_to be_bypass_cognito
+      end
+    end
+  end
+
   describe ".refresh_token_cookie_name" do
     before do
       allow(ENV).to receive(:fetch).with("ENVIRONMENT", "production").and_return(environment)
