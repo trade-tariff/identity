@@ -116,6 +116,29 @@ RSpec.describe "Sessions", type: :request do
         expect(cookies[:id_token]).to be_blank
         expect(cookies[:refresh_token]).to be_blank
       end
+
+      it "clears cookies and renders login when refresh token is rejected by Cognito" do
+        allow(CognitoTokenVerifier).to receive(:call).and_return(:expired)
+        allow(cognito).to receive(:get_tokens_from_refresh_token)
+          .and_raise(Aws::CognitoIdentityProvider::Errors::NotAuthorizedException.new(nil, "Refresh token revoked"))
+        get new_session_path, params: { consumer_id: consumer.id }
+        expect(response).to have_http_status(:ok)
+      end
+
+      it "logs error when token refresh raises an unexpected error" do
+        allow(CognitoTokenVerifier).to receive(:call).and_return(:expired)
+        allow(cognito).to receive(:get_tokens_from_refresh_token).and_raise(StandardError.new("unexpected"))
+        allow(Rails.logger).to receive(:error)
+        get new_session_path, params: { consumer_id: consumer.id }
+        expect(Rails.logger).to have_received(:error).with(/Token refresh failed/)
+      end
+
+      it "renders login when refresh token cookie is blank and session is expired" do
+        cookies[:refresh_token] = nil
+        allow(CognitoTokenVerifier).to receive(:call).and_return(:expired)
+        get new_session_path, params: { consumer_id: consumer.id }
+        expect(response).to have_http_status(:ok)
+      end
     end
   end
 end

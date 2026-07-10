@@ -109,6 +109,23 @@ RSpec.describe User, type: :model do
         expect(find_user).to be_nil
       end
     end
+
+    context "when the user pool is not found" do
+      subject(:find_user) { described_class.find(username, group) }
+
+      before do
+        expected_args = { user_pool_id: user_pool_id, username: username }
+        allow(cognito).to receive(:admin_get_user)
+          .with(expected_args)
+          .and_raise(
+            Aws::CognitoIdentityProvider::Errors::ResourceNotFoundException.new(nil, "User pool not found"),
+          )
+      end
+
+      it "returns nil" do
+        expect(find_user).to be_nil
+      end
+    end
   end
 
   describe ".destroy" do
