@@ -46,8 +46,8 @@ private
     rescue Aws::CognitoIdentityProvider::Errors::NotAuthorizedException
       clear_cookies
       false
-    rescue StandardError => e
-      Rails.logger.error("Token refresh failed: #{e.message}")
+    rescue Aws::Errors::ServiceError => e
+      Rails.logger.error("Token refresh failed: #{e.full_message}")
       false
     end
   end

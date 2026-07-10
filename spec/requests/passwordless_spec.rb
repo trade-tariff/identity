@@ -57,8 +57,8 @@ RSpec.describe "Passwordless", type: :request do
       expect(response).to redirect_to(passwordless_path)
     end
 
-    it "redirects to login_path on error" do
-      allow(cognito).to receive(:admin_initiate_auth).and_raise(StandardError.new("Error"))
+    it "redirects to login_path on Cognito service errors" do
+      allow(cognito).to receive(:admin_initiate_auth).and_raise(Aws::CognitoIdentityProvider::Errors::TooManyRequestsException.new(nil, "Too many requests"))
       post passwordless_path, params: { passwordless_form: { email: } }
       expect(response).to redirect_to(login_path)
     end
@@ -96,10 +96,12 @@ RSpec.describe "Passwordless", type: :request do
       let(:cognito_auth_object) { Data.define(:authentication_result).new(authentication_result) }
 
       before do
-        post passwordless_path, params: { email: }
-
-        allow(cognito).to receive(:respond_to_auth_challenge).and_return(cognito_auth_object)
-        allow(cognito).to receive(:admin_update_user_attributes)
+        allow(cognito).to receive_messages(
+          admin_initiate_auth: Data.define(:session).new("session"),
+          respond_to_auth_challenge: cognito_auth_object,
+          admin_update_user_attributes: nil,
+        )
+        post passwordless_path, params: { passwordless_form: { email: } }
       end
 
       it "responds to auth challenge" do
@@ -145,9 +147,9 @@ RSpec.describe "Passwordless", type: :request do
       end
     end
 
-    context "when an error occurs" do
+    context "when a Cognito service error occurs" do
       it "redirects to the consumer's failure URL" do
-        allow(cognito).to receive(:respond_to_auth_challenge).and_raise(StandardError.new("Error"))
+        allow(cognito).to receive(:respond_to_auth_challenge).and_raise(Aws::CognitoIdentityProvider::Errors::TooManyRequestsException.new(nil, "Too many requests"))
         get callback_passwordless_path, params: { email:, token: "token" }
         expect(response).to redirect_to(consumer.failure_url)
       end
