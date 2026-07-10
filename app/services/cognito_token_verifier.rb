@@ -13,7 +13,7 @@ class CognitoTokenVerifier
 
   def call
     return :invalid if token.blank? || consumer.blank?
-    return :invalid if jwks_keys.nil? && !Rails.env.development?
+    return :invalid if jwks_keys.nil? && !TradeTariffIdentity.bypass_cognito?
 
     decoded_token = decode_and_verify_token
     user_in_authorized_group?(decoded_token) ? :valid : :invalid
@@ -34,13 +34,13 @@ private
   end
 
   def decrypt_token_if_needed
-    return token if Rails.env.development?
+    return token if TradeTariffIdentity.bypass_cognito?
 
     EncryptionService.decrypt_string(token)
   end
 
   def decode_jwt_token(token_to_decode)
-    if Rails.env.development?
+    if TradeTariffIdentity.bypass_cognito?
       JWT.decode(token_to_decode, nil, false)
     else
       JWT.decode(token_to_decode, nil, true,

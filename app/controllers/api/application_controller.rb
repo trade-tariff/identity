@@ -2,7 +2,7 @@ module Api
   class ApplicationController < ActionController::API
     include ActionController::HttpAuthentication::Token::ControllerMethods
 
-    before_action :authenticate, unless: -> { Rails.env.development? }
+    before_action :authenticate, unless: -> { TradeTariffIdentity.bypass_cognito? }
 
   private
 
