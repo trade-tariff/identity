@@ -125,9 +125,9 @@ RSpec.describe "Sessions", type: :request do
         expect(response).to have_http_status(:ok)
       end
 
-      it "logs error when token refresh raises an unexpected error" do
+      it "logs error when token refresh raises an unexpected AWS service error" do
         allow(CognitoTokenVerifier).to receive(:call).and_return(:expired)
-        allow(cognito).to receive(:get_tokens_from_refresh_token).and_raise(StandardError.new("unexpected"))
+        allow(cognito).to receive(:get_tokens_from_refresh_token).and_raise(Aws::Errors::ServiceError.new(nil, "unexpected"))
         allow(Rails.logger).to receive(:error)
         get new_session_path, params: { consumer_id: consumer.id }
         expect(Rails.logger).to have_received(:error).with(/Token refresh failed/)
