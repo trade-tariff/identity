@@ -1,6 +1,10 @@
 class CognitoTokenVerifier
   def self.issuer
-    "https://cognito-idp.#{ENV['AWS_REGION']}.amazonaws.com/#{ENV['COGNITO_USER_POOL_ID']}"
+    region = ENV.fetch("AWS_REGION")
+    user_pool_id = TradeTariffIdentity.cognito_user_pool_id
+    raise KeyError, "key not found: COGNITO_USER_POOL_ID" unless user_pool_id
+
+    "https://cognito-idp.#{region}.amazonaws.com/#{user_pool_id}"
   end
 
   def self.jwks_url
