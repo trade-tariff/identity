@@ -89,11 +89,11 @@ RSpec.describe "Passwordless", type: :request do
     end
   end
 
-  describe "GET /callback" do
-    context "when link is correct and used in a timely manner" do
+  describe "POST /verify" do
+    context "when the code is correct" do
       let(:consumer) { build(:consumer) }
       let(:authentication_result) { Data.define(:id_token, :refresh_token).new("id_token", "refresh_token") }
-      let(:cognito_auth_object) { Data.define(:authentication_result).new(authentication_result) }
+      let(:cognito_auth_object) { Data.define(:authentication_result, :session).new(authentication_result, nil) }
 
       before do
         allow(cognito).to receive_messages(
@@ -104,28 +104,31 @@ RSpec.describe "Passwordless", type: :request do
         post passwordless_path, params: { passwordless_form: { email: } }
       end
 
-      it "responds to auth challenge" do
-        get callback_passwordless_path, params: { email:, token: "token" }
-        expect(cognito).to have_received(:respond_to_auth_challenge)
+      it "responds to the auth challenge with the stored session, username, and entered code" do
+        post verify_passwordless_path, params: { passwordless_code_form: { code: "123456" } }
+
+        expected_args = hash_including(session: "session", challenge_name: "CUSTOM_CHALLENGE",
+                                       challenge_responses: { "USERNAME" => email, "ANSWER" => "123456" })
+        expect(cognito).to have_received(:respond_to_auth_challenge).with(expected_args)
       end
 
       it "verifies email in Cognito" do
-        get callback_passwordless_path, params: { email:, token: "token" }
+        post verify_passwordless_path, params: { passwordless_code_form: { code: "123456" } }
         expect(cognito).to have_received(:admin_update_user_attributes)
       end
 
       it "sets id_token cookie" do
-        get callback_passwordless_path, params: { email:, token: "token" }
+        post verify_passwordless_path, params: { passwordless_code_form: { code: "123456" } }
         expect(cookies["id_token"]).to be_a(String)
       end
 
       it "sets refresh_token cookie" do
-        get callback_passwordless_path, params: { email:, token: "token" }
+        post verify_passwordless_path, params: { passwordless_code_form: { code: "123456" } }
         expect(cookies["refresh_token"]).to eq "refresh_token"
       end
 
       it "redirects to the consumer's success URL" do
-        get callback_passwordless_path, params: { email:, token: "token" }
+        post verify_passwordless_path, params: { passwordless_code_form: { code: "123456" } }
         expect(response).to redirect_to(consumer.success_url)
       end
 
@@ -133,45 +136,125 @@ RSpec.describe "Passwordless", type: :request do
         get root_path, params: { consumer_id: consumer.id, return_to: "/subscriptions/mycommodities?as_of=2025-06-20" }
         post passwordless_path, params: { passwordless_form: { email: } }
 
-        get callback_passwordless_path, params: { email:, token: "token" }
+        post verify_passwordless_path, params: { passwordless_code_form: { code: "123456" } }
 
         expect(response).to redirect_to("#{consumer.success_url}?return_to=%2Fsubscriptions%2Fmycommodities%3Fas_of%3D2025-06-20")
       end
     end
 
-    context "when link id invalid" do
-      it "redirects to the consumer's failure URL" do
+    context "when the code is wrong but a retry is still available" do
+      let(:retry_response) { Data.define(:authentication_result, :session).new(nil, "new-cognito-session") }
+
+      before do
+        post passwordless_path, params: { passwordless_form: { email: } }
+        allow(cognito).to receive(:respond_to_auth_challenge).and_return(retry_response)
+      end
+
+      it "re-renders the code form with an error", :aggregate_failures do
+        post verify_passwordless_path, params: { passwordless_code_form: { code: "999999" } }
+
+        expect(response).to have_http_status(:ok)
+        expect(response.body).to include("The code you entered is incorrect")
+      end
+
+      it "stores the new Cognito session for the next attempt" do
+        post verify_passwordless_path, params: { passwordless_code_form: { code: "999999" } }
+        expect(session[:login]).to eq("new-cognito-session")
+      end
+    end
+
+    context "when attempts are exhausted or the code has expired" do
+      it "re-renders the code form with an exhausted-attempts error", :aggregate_failures do
         allow(cognito).to receive(:respond_to_auth_challenge).and_raise(Aws::CognitoIdentityProvider::Errors::NotAuthorizedException.new(nil, "Not authorized"))
-        get callback_passwordless_path, params: { email:, token: "token" }
-        expect(response).to redirect_to(consumer.failure_url)
+        post passwordless_path, params: { passwordless_form: { email: } }
+
+        post verify_passwordless_path, params: { passwordless_code_form: { code: "999999" } }
+
+        expect(response).to have_http_status(:ok)
+        expect(response.body).to include("Request a new code")
+      end
+    end
+
+    context "when the submitted code is not 6 digits" do
+      it "re-renders the code form with a validation error" do
+        post passwordless_path, params: { passwordless_form: { email: } }
+
+        post verify_passwordless_path, params: { passwordless_code_form: { code: "12" } }
+
+        expect(response.body).to include("Enter the 6-digit code from your email")
       end
     end
 
     context "when a Cognito service error occurs" do
       it "redirects to the consumer's failure URL" do
+        post passwordless_path, params: { passwordless_form: { email: } }
         allow(cognito).to receive(:respond_to_auth_challenge).and_raise(Aws::CognitoIdentityProvider::Errors::TooManyRequestsException.new(nil, "Too many requests"))
-        get callback_passwordless_path, params: { email:, token: "token" }
+
+        post verify_passwordless_path, params: { passwordless_code_form: { code: "123456" } }
+
         expect(response).to redirect_to(consumer.failure_url)
       end
     end
 
-    context "when no consumer is found" do
-      it "renders the invalid page", :aggregate_failures do
-        allow(Consumer).to receive(:load).with(consumer.id).and_return(nil)
-        get callback_passwordless_path, params: { email:, token: "token" }
+    context "when there is no passwordless session (stale or direct request)" do
+      it "redirects to login_path without calling Cognito", :aggregate_failures do
+        reset!
+        allow(cognito).to receive(:respond_to_auth_challenge)
 
-        expect(response).to have_http_status(:ok)
-        expect(response.body).to include("Different browser detected")
-        expect(response.body).to include("Your system has opened the verification link in a different browser.")
+        post verify_passwordless_path, params: { passwordless_code_form: { code: "123456" } }
+
+        expect(response).to redirect_to(login_path)
+        expect(cognito).not_to have_received(:respond_to_auth_challenge)
+      end
+    end
+  end
+
+  describe "POST /resend" do
+    before do
+      post passwordless_path, params: { passwordless_form: { email: } }
+    end
+
+    it "re-initiates auth with the same email" do
+      post resend_passwordless_path
+      expect(cognito).to have_received(:admin_initiate_auth).with(
+        hash_including(auth_parameters: hash_including("USERNAME" => email)),
+      ).twice
+    end
+
+    it "updates the stored Cognito session" do
+      allow(cognito).to receive(:admin_initiate_auth).and_return(Data.define(:session).new("resent-session"))
+      post resend_passwordless_path
+      expect(session[:login]).to eq("resent-session")
+    end
+
+    it "redirects back to the code entry page" do
+      post resend_passwordless_path
+      expect(response).to redirect_to(passwordless_path)
+    end
+
+    context "when there is no email in session" do
+      it "redirects to login_path" do
+        reset!
+        post resend_passwordless_path
+        expect(response).to redirect_to(login_path)
+      end
+    end
+
+    context "when a resend was requested less than 30 seconds ago" do
+      it "does not re-initiate auth a second time" do
+        post resend_passwordless_path
+        post resend_passwordless_path
+
+        expect(cognito).to have_received(:admin_initiate_auth).twice # 1 from the outer create, 1 from the first resend
       end
 
-      it "shows the verification link from the current request URL" do
-        allow(Consumer).to receive(:load).with(consumer.id).and_return(nil)
+      it "redirects with a cooldown message", :aggregate_failures do
+        post resend_passwordless_path
+        post resend_passwordless_path
 
-        get callback_passwordless_path, params: { email:, token: "token" }
-
-        expected_url = callback_passwordless_url(email:, token: "token")
-        expect(response.body).to include(expected_url.gsub("&", "&amp;"))
+        expect(response).to redirect_to(passwordless_path)
+        follow_redirect!
+        expect(response.body).to include("wait a short while")
       end
     end
   end

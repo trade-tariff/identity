@@ -1,0 +1,11 @@
+.otp-input {
+  display: flex;
+  gap: 10px;
+}
+
+.otp-input__box {
+  width: 44px;
+  height: 44px;
+  text-align: center;
+  padding: 0;
+}

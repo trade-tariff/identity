@@ -16,9 +16,11 @@ ErrorsController#internal_server_error
 ErrorsController#not_found
 HealthcheckController#check
 HealthcheckController#checkz
-PasswordlessController#callback
+PasswordlessCodeForm#code=
 PasswordlessController#create
+PasswordlessController#resend
 PasswordlessController#show
+PasswordlessController#verify
 PasswordlessForm#email=
 SessionsController#index
 SessionsController#new

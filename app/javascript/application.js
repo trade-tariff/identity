@@ -1,5 +1,6 @@
 // Configure your import map in config/importmap.rb. Read more: https://github.com/rails/importmap-rails
 import { initAll } from 'govuk-frontend'
+import 'otp_input'
 
 document.addEventListener('DOMContentLoaded', () => {
   initAll();

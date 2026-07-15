@@ -1,19 +1,52 @@
-<% page_title "Check your email" %>
+<% page_title "Enter your code" %>
 
-<h1 class="govuk-heading-l">Check your email</h1>
+<%= render "sessions/flash" %>
 
-<p class="govuk-body">An email has been sent to <strong><%= @email %></strong></p>
-<p class="govuk-body">You must follow the link in the email to verify your email address.</p>
-<div class="govuk-inset-text">The link will stop working after 15 minutes.</div>
+<h1 class="govuk-heading-l">Enter your code</h1>
 
-<%= govuk_details(summary_text: "Not received an email?") do %>
+<p class="govuk-body">We've sent a 6-digit code to <strong><%= @email %></strong></p>
+<div class="govuk-inset-text">The code will stop working after 15 minutes.</div>
+
+<%= form_with model: @passwordless_code, url: verify_passwordless_path, local: true, html: { autocomplete: "off" } do |f| %>
+  <%= f.govuk_error_summary %>
+
+  <% has_error = @passwordless_code.errors[:code].any? %>
+  <div class="govuk-form-group<%= ' govuk-form-group--error' if has_error %>">
+    <label class="govuk-label" for="passwordless_code_form_code">6-digit code</label>
+    <% if has_error %>
+      <p class="govuk-error-message" id="passwordless-code-form-code-error">
+        <span class="govuk-visually-hidden">Error:</span> <%= @passwordless_code.errors[:code].first %>
+      </p>
+    <% end %>
+    <div class="otp-input<%= ' otp-input--error' if has_error %>"
+         data-otp-input
+         <%= 'aria-describedby="passwordless-code-form-code-error"'.html_safe if has_error %>>
+      <input class="govuk-input otp-input__box<%= ' govuk-input--error' if has_error %>"
+             type="text" id="passwordless_code_form_code"
+             inputmode="numeric" maxlength="1" pattern="[0-9]"
+             autocomplete="one-time-code" aria-label="Digit 1 of 6" data-otp-box>
+      <% (2..6).each do |i| %>
+        <input class="govuk-input otp-input__box<%= ' govuk-input--error' if has_error %>"
+               type="text" inputmode="numeric" maxlength="1" pattern="[0-9]"
+               aria-label="Digit <%= i %> of 6" data-otp-box>
+      <% end %>
+      <input type="hidden" name="passwordless_code_form[code]" data-otp-value>
+    </div>
+  </div>
+
+  <%= f.govuk_submit "Continue" %>
+<% end %>
+
+<%= govuk_details(summary_text: "Not received a code?") do %>
   <p class="govuk-body">
     Emails sometimes take a few minutes to arrive.
   </p>
 
   <p class="govuk-body">
-    If you do not receive an email soon, check your spam or junk folder.
+    If you do not receive a code soon, check your spam or junk folder.
   </p>
+
+  <%= button_to "Resend code", resend_passwordless_path, method: :post, class: "govuk-button govuk-button--secondary" %>
 
   <p class="govuk-body">
     If this does not work, <%= govuk_link_to "contact us", "mailto:tariffmanagement@hmrc.gov.uk" %> for help.
