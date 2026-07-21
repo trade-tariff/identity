@@ -5,7 +5,7 @@ ENV["RAILS_ENV"] ||= "test"
 require "simplecov"
 
 SimpleCov.start "rails"
-SimpleCov.formatters = SimpleCov::Formatter::HTMLFormatter
+SimpleCov.formatter = SimpleCov::Formatter::HTMLFormatter
 
 require_relative "../config/environment"
 # Prevent database truncation if the environment is production
