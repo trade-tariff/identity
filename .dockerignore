@@ -1,0 +1,12 @@
+.bundle
+.direnv
+.git
+.github
+.nix
+.ruby-lsp
+coverage
+log
+spec
+terraform
+tmp
+vendor/bundle
