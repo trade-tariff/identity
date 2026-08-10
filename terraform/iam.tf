@@ -8,7 +8,8 @@ data "aws_iam_policy_document" "task" {
       "ssmmessages:OpenDataChannel",
       "logs:CreateLogStream",
       "logs:DescribeLogStreams",
-      "logs:PutLogEvents"
+      "logs:PutLogEvents",
+      "cloudwatch:PutMetricData",
     ]
     resources = ["*"]
   }
