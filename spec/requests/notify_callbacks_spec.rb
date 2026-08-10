@@ -46,6 +46,21 @@ RSpec.describe "POST /notify/callback", type: :request do
   end
 
   context "with a valid bearer token" do
+    let(:expected_metric) do
+      {
+        namespace: "TradeTariff/Notify",
+        metric_data: [{
+          metric_name: "DeliveryFailures",
+          value: 1,
+          unit: "Count",
+          dimensions: [
+            { name: "Environment", value: Rails.env },
+            { name: "Pipeline", value: "identity" },
+          ],
+        }],
+      }
+    end
+
     %w[permanent-failure technical-failure].each do |status|
       it "returns 200 for #{status}" do
         post_callback(status:)
@@ -54,43 +69,51 @@ RSpec.describe "POST /notify/callback", type: :request do
 
       it "emits a CloudWatch DeliveryFailures metric for #{status}" do
         post_callback(status:)
-        expect(cloudwatch_client).to have_received(:put_metric_data).with(
-          namespace: "TradeTariff/Notify",
-          metric_data: [{
-            metric_name: "DeliveryFailures",
-            value: 1,
-            unit: "Count",
-            dimensions: [
-              { name: "Environment", value: Rails.env },
-              { name: "Pipeline", value: "identity" },
-            ],
-          }],
-        )
+        expect(cloudwatch_client).to have_received(:put_metric_data).with(expected_metric)
       end
     end
 
-    it "returns 200 for temporary-failure without emitting a metric" do
-      post_callback(status: "temporary-failure")
-      expect(response).to have_http_status(:ok)
-      expect(cloudwatch_client).not_to have_received(:put_metric_data)
+    context "when status is temporary-failure" do
+      it "returns 200" do
+        post_callback(status: "temporary-failure")
+        expect(response).to have_http_status(:ok)
+      end
+
+      it "does not emit a metric" do
+        post_callback(status: "temporary-failure")
+        expect(cloudwatch_client).not_to have_received(:put_metric_data)
+      end
     end
 
-    it "returns 200 for delivered without emitting a metric" do
-      post_callback(status: "delivered")
-      expect(response).to have_http_status(:ok)
-      expect(cloudwatch_client).not_to have_received(:put_metric_data)
+    context "when status is delivered" do
+      it "returns 200" do
+        post_callback(status: "delivered")
+        expect(response).to have_http_status(:ok)
+      end
+
+      it "does not emit a metric" do
+        post_callback(status: "delivered")
+        expect(cloudwatch_client).not_to have_received(:put_metric_data)
+      end
     end
 
-    it "returns 200 even when CloudWatch raises a service error" do
-      allow(cloudwatch_client).to receive(:put_metric_data).and_raise(
-        Aws::CloudWatch::Errors::ServiceError.new(nil, "throttled"),
-      )
-      allow(Rails.logger).to receive(:error)
+    context "when CloudWatch raises a service error" do
+      before do
+        allow(cloudwatch_client).to receive(:put_metric_data).and_raise(
+          Aws::CloudWatch::Errors::ServiceError.new(nil, "throttled"),
+        )
+        allow(Rails.logger).to receive(:error)
+      end
 
-      post_callback(status: "permanent-failure")
+      it "returns 200" do
+        post_callback(status: "permanent-failure")
+        expect(response).to have_http_status(:ok)
+      end
 
-      expect(response).to have_http_status(:ok)
-      expect(Rails.logger).to have_received(:error).with(a_string_including("notify_cloudwatch_metric_failed"))
+      it "logs the error" do
+        post_callback(status: "permanent-failure")
+        expect(Rails.logger).to have_received(:error).with(a_string_including("notify_cloudwatch_metric_failed"))
+      end
     end
   end
 end

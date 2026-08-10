@@ -1,5 +1,5 @@
 class NotifyCallbacksController < ActionController::API
-  METRIC_NAMESPACE = 'TradeTariff/Notify'
+  METRIC_NAMESPACE = "TradeTariff/Notify".freeze
   FAILURE_STATUSES = %w[permanent-failure technical-failure].freeze
 
   before_action :verify_notify_token
@@ -12,10 +12,10 @@ class NotifyCallbacksController < ActionController::API
 private
 
   def verify_notify_token
-    expected = ENV.fetch('NOTIFY_CALLBACK_BEARER_TOKEN', '')
+    expected = ENV.fetch("NOTIFY_CALLBACK_BEARER_TOKEN", "")
     return head :forbidden if expected.blank?
 
-    provided = request.headers['Authorization'].to_s.delete_prefix('Bearer ')
+    provided = request.headers["Authorization"].to_s.delete_prefix("Bearer ")
     head :forbidden unless ActiveSupport::SecurityUtils.secure_compare(provided, expected)
   end
 
@@ -23,12 +23,12 @@ private
     Aws::CloudWatch::Client.new.put_metric_data(
       namespace: METRIC_NAMESPACE,
       metric_data: [{
-        metric_name: 'DeliveryFailures',
+        metric_name: "DeliveryFailures",
         value: 1,
-        unit: 'Count',
+        unit: "Count",
         dimensions: [
-          { name: 'Environment', value: Rails.env },
-          { name: 'Pipeline', value: 'identity' },
+          { name: "Environment", value: Rails.env },
+          { name: "Pipeline", value: "identity" },
         ],
       }],
     )
