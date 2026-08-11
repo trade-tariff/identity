@@ -6,7 +6,7 @@ RSpec.describe "POST /notify/callback", type: :request do
   let(:cloudwatch_client) { instance_double(Aws::CloudWatch::Client) }
 
   before do
-    stub_const("ENV", ENV.to_h.merge("NOTIFY_CALLBACK_BEARER_TOKEN" => bearer_token))
+    stub_const("ENV", ENV.to_h.merge("NOTIFY_CALLBACK_BEARER_TOKEN" => bearer_token, "ENVIRONMENT" => Rails.env))
     allow(Aws::CloudWatch::Client).to receive(:new).and_return(cloudwatch_client)
     allow(cloudwatch_client).to receive(:put_metric_data)
   end
@@ -54,7 +54,7 @@ RSpec.describe "POST /notify/callback", type: :request do
           value: 1,
           unit: "Count",
           dimensions: [
-            { name: "Environment", value: Rails.env },
+            { name: "Environment", value: ENV.fetch("ENVIRONMENT", "local") },
             { name: "Pipeline", value: "identity" },
           ],
         }],
