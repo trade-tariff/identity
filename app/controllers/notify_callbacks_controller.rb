@@ -27,7 +27,7 @@ private
         value: 1,
         unit: "Count",
         dimensions: [
-          { name: "Environment", value: Rails.env },
+          { name: "Environment", value: ENV.fetch('ENVIRONMENT', 'local') },
           { name: "Pipeline", value: "identity" },
         ],
       }],
