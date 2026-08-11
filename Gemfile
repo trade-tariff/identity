@@ -4,6 +4,7 @@ ruby file: ".ruby-version"
 
 gem "rails", "~> 8.1.3"
 
+gem "aws-sdk-cloudwatch"
 gem "aws-sdk-cognitoidentityprovider"
 gem "bootsnap", require: false
 gem "faraday"

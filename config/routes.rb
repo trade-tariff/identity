@@ -2,6 +2,8 @@ Rails.application.routes.draw do
   get "/healthcheck", to: "healthcheck#check"
   get "/healthcheckz", to: "healthcheck#checkz"
 
+  post "notify/callback", to: "notify_callbacks#create", defaults: { format: "json" }
+
   namespace :api, defaults: { format: 'json' } do
     resources :users, only: %i[show destroy]
     post "client_credentials", to: "client_credentials#create"
