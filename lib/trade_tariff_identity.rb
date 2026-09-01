@@ -54,5 +54,12 @@ module TradeTariffIdentity
     def bypass_cognito?
       Rails.env.development? || (ENV["BYPASS_COGNITO"] == "true")
     end
+
+    def feedback_url
+      ENV.fetch(
+        "FEEDBACK_URL",
+        "https://www.trade-tariff.service.gov.uk/feedback",
+      )
+    end
   end
 end
