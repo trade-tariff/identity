@@ -15,6 +15,7 @@ gem "jwt"
 gem "newrelic_rpm"
 gem "propshaft"
 gem "puma", ">= 5.0"
+gem "resolv", "~> 0.7.2"
 
 group :development, :test do
   gem "brakeman", require: false

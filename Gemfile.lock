@@ -281,6 +281,7 @@ GEM
       io-console (~> 0.5)
     request_store (1.7.0)
       rack (>= 1.4)
+    resolv (0.7.2)
     rspec-core (3.13.6)
       rspec-support (~> 3.13.0)
     rspec-expectations (3.13.5)
@@ -392,6 +393,7 @@ DEPENDENCIES
   propshaft
   puma (>= 5.0)
   rails (~> 8.1.3)
+  resolv (~> 0.7.2)
   rspec-rails
   rubocop-govuk
   simplecov
