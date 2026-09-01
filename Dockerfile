@@ -43,8 +43,12 @@ RUN apk add --update --no-cache \
     bash \
     socat \
     tzdata && \
+    apk upgrade --no-cache libcrypto3 libssl3 && \
     cp /usr/share/zoneinfo/Europe/London /etc/localtime && \
-    echo "Europe/London" > /etc/timezone
+    echo "Europe/London" > /etc/timezone && \
+    rm -f /usr/local/lib/ruby/gems/*/specifications/default/json-*.gemspec && \
+    rm -rf /usr/local/lib/ruby/gems/*/gems/json-* && \
+    rm -rf /usr/local/lib/ruby/*/json.rb /usr/local/lib/ruby/*/json /usr/local/lib/ruby/*/*-linux-musl/json
 
 # The application runs from /app
 WORKDIR /app
