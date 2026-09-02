@@ -28,6 +28,7 @@
   <body class="govuk-template__body app-body-class">
     <div class="govuk-width-container app-width-container">
     <script>document.body.className += ' js-enabled' + ('noModule' in HTMLScriptElement.prototype ? ' govuk-frontend-supported' : '');</script>
+    <%= render 'shared/feedback_banner' %>
     <main class="govuk-main-wrapper app-main-class" id="main-content">
       <%= yield %>
     </main>

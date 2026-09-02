@@ -9,3 +9,7 @@
   text-align: center;
   padding: 0;
 }
+
+.tariff-feedback-banner > .govuk-phase-banner {
+  padding-top: 20px;
+}

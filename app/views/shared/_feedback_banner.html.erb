@@ -1,0 +1,5 @@
+<div class="tariff-feedback-banner">
+  <%= govuk_phase_banner(tag: { text: local_assigns.fetch(:tag_text, 'FEEDBACK') }) do %>
+    Tell is what you think - your <%= govuk_link_to 'feedback', TradeTariffIdentity.feedback_url %> will help us improve.
+  <% end %>
+</div>
