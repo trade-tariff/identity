@@ -13,6 +13,8 @@ module "service" {
   target_group_arn = data.aws_lb_target_group.this_https.arn
   container_port   = 8443
 
+  private_dns_namespace = "tariff.internal"
+
   cloudwatch_log_group_name = "platform-logs-${var.environment}"
 
   docker_image = local.ecr_repo
