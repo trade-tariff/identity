@@ -72,14 +72,21 @@ RSpec.describe "Users API", type: :request do
       end
     end
 
-    context "when request causes an error" do
+    context "when Cognito refuses the deletion" do
       before do
-        allow(User).to receive(:destroy).with(username, "group1").and_return(false)
+        allow(User).to receive(:destroy)
+          .with(username, "group1")
+          .and_raise(User::DeletionError, "Cognito refused deletion of test_user: Rate exceeded")
       end
 
-      it "returns an unsuccessful response" do
+      it "returns an unsuccessful response so the caller retries" do
         delete api_user_path(username), headers: headers
         expect(response).to have_http_status(:internal_server_error)
+      end
+
+      it "returns the error details" do
+        delete api_user_path(username), headers: headers
+        expect(JSON.parse(response.body)["error"]).to eq("Something went wrong")
       end
     end
 

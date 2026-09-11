@@ -23,6 +23,10 @@ class User
     end
   end
 
+  # Raised when Cognito refuses a deletion and the user is therefore still
+  # present. Callers must not be able to mistake that for a completed deletion.
+  class DeletionError < StandardError; end
+
   def self.destroy(username, group = nil)
     cognito = CognitoServiceAdapter.new
 
@@ -37,10 +41,16 @@ class User
 
       true
     rescue Aws::CognitoIdentityProvider::Errors::UserNotFoundException
+      # The user being absent is the state the caller asked for, so this is a
+      # success. It is the only AWS error that means the deletion need not happen.
       true
     rescue Aws::CognitoIdentityProvider::Errors::ServiceError => e
-      Rails.logger.error("Failed to delete user: #{e.message}")
-      false
+      # Everything else leaves the user in place. TooManyRequestsException is the
+      # one that bites during the nightly sweep: returning false here let each
+      # throttled deletion pass for a completed one, so the sweep finished green
+      # and the accounts stayed. Raising makes the failed deletion visible and
+      # lets the caller decide whether to retry.
+      raise DeletionError, "Cognito refused deletion of #{username}: #{e.message}"
     end
   end
 

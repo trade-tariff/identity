@@ -88,6 +88,34 @@ RSpec.describe RemoveUnverifiedUsers do
     end
   end
 
+  context "when Cognito refuses a deletion" do
+    before do
+      allow(adapter).to receive(:list_users).and_return(
+        stub_list_users_response(
+          users: [build_user(age: 2.days.ago, username: "old_unverified_1", email_verified: "false")],
+          pagination_token: "next-token",
+        ),
+        stub_list_users_response(
+          users: [build_user(age: 2.days.ago, username: "old_unverified_2", email_verified: "false")],
+        ),
+      )
+
+      allow(User).to receive(:destroy)
+        .with("old_unverified_1", "myott")
+        .and_raise(User::DeletionError, "Cognito refused deletion of old_unverified_1: Rate exceeded")
+    end
+
+    it "raises rather than completing the sweep as though the users were removed" do
+      expect { service.call }.to raise_error(User::DeletionError, /old_unverified_1/)
+    end
+
+    it "stops the sweep instead of burning more throttled calls" do
+      suppress(User::DeletionError) { service.call }
+
+      expect(User).not_to have_received(:destroy).with("old_unverified_2", "myott")
+    end
+  end
+
   context "when Cognito returns multiple pages" do
     before do
       allow(adapter).to receive(:list_users).and_return(

@@ -20,6 +20,10 @@ class RemoveUnverifiedUsers
       response.users.each do |user|
         next if verified?(user) || user.user_create_date > cutoff_time
 
+        # Deliberately unrescued. A refused deletion means this user is still
+        # here, and throttling refuses every following call too, so continuing
+        # the sweep only burns more throttled calls and hides the failure. The
+        # task is idempotent and runs daily, so aborting costs one night.
         User.destroy(user.username, group_id)
       end
 
