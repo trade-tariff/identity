@@ -211,16 +211,25 @@ RSpec.describe User, type: :model do
           .and_raise(
             Aws::CognitoIdentityProvider::Errors::ServiceError.new(nil, "Service error"),
           )
-        allow(Rails.logger).to receive(:error)
       end
 
-      it "logs the error" do
-        destroy_user
-        expect(Rails.logger).to have_received(:error).with(/Failed to delete user/)
+      it "raises DeletionError naming the user" do
+        expect { destroy_user }.to raise_error(User::DeletionError, /#{username}/)
+      end
+    end
+
+    context "when Cognito throttles the deletion" do
+      before do
+        allow(cognito).to receive(:admin_list_groups_for_user)
+          .and_return(build_groups_response(group))
+        allow(cognito).to receive(:admin_remove_user_from_group)
+          .and_raise(
+            Aws::CognitoIdentityProvider::Errors::TooManyRequestsException.new(nil, "Rate exceeded"),
+          )
       end
 
-      it "returns false" do
-        expect(destroy_user).to be false
+      it "raises DeletionError rather than reporting a successful deletion" do
+        expect { destroy_user }.to raise_error(User::DeletionError, /Rate exceeded/)
       end
     end
   end
