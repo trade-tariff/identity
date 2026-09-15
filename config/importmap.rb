@@ -2,4 +2,4 @@
 
 pin "application"
 pin "otp_input"
-pin "govuk-frontend" # @6.5.1
+pin "govuk-frontend" # @6.4.0
