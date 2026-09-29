@@ -1,71 +1,66 @@
-# identity
+# Trade Tariff Identity
 
-Ruby app providing interface to Cognito allowing users to be authenticated.
+Identity provides passwordless sign-in for Trade Tariff applications through
+AWS Cognito. It supplies user details and tokens to configured consumers,
+including Admin, Dev Hub and MyOTT. It also exposes APIs for user management
+and client credentials.
 
-Initially this service exists to work with 1 consumer,
-but allows for new consumers and new login methods to be added in the future.
+This is a Ruby on Rails application. It does not use an Active Record database;
+Cognito holds the user identities. Consumer routes and callback URLs are defined
+in [config/consumers.yml](config/consumers.yml).
 
-Users email address will be stored securly in AWS Cognito. Once authenticated,
-user details and access tokens are made available for a limited time to
-consumers applications.
+## Run locally
 
-## Getting started
+Use Ruby at the version in [.ruby-version](.ruby-version) and Bundler:
 
-### AWS Locally
-
-Add the following env variables to an `.env.development.local` file:
-
-``` sh
-COGNITO_USER_POOL_ID
-COGNITO_CLIENT_ID
-AWS_ACCESS_KEY_ID
-AWS_SECRET_ACCESS_KEY
-AWS_SESSION_TOKEN
-```
-
-### Start the app with
-
-``` sh
+```sh
+bundle install
 bin/dev
 ```
 
-Go to the [Login page](http://localhost:3005/myott)
+Development defaults are in [.env.development](.env.development). Put overrides
+in `.env.development.local`, and keep secrets outside Git. Open
+<http://localhost:3005/myott> for the MyOTT consumer. The consuming application
+must also be running at its configured callback URL to complete the journey.
 
-## Passwordless Login
+Rails development uses the local Cognito bypass in
+[lib/trade_tariff_identity.rb](lib/trade_tariff_identity.rb). It does not prove
+that real Cognito authentication works. Never enable a development bypass to
+circumvent access controls in a shared environment.
 
-Shows how the login flow interacts with Cognito.
+For an authorised Cognito integration environment, configure `AWS_REGION`,
+`COGNITO_USER_POOL_ID`, `COGNITO_CLIENT_ID` and the required AWS credentials.
+Temporary AWS credentials also need `AWS_SESSION_TOKEN`. Check consumer URLs,
+cookie domains and encryption settings before testing a complete sign-in flow.
+Outside development, consumers that decrypt Identity cookies must use the same
+`ENCRYPTION_SECRET` as Identity. Share it through the approved secret mechanism.
+Use disposable test identities, not production accounts.
 
-![Diagram](docs/passwordless_login_flow.png)
+## Check changes
 
-### Cognito JWT
+```sh
+bundle exec rspec
+bundle exec rubocop
+bundle exec brakeman
+```
 
-When the user is redirected to the service, a Cognito JWT is set as a cookie
-called `id_token` which contains the user's details. In non-development
-environments the token is encrypted using `ENCRYPTION_SECRET`. This needs to
-be shared with the consuming service.
+See [CI configuration](.github/workflows/ci.yml) for the current checks.
+Authentication and credential-management changes need security-focused review.
 
-<!-- BEGIN_TF_DOCS -->
-## Requirements
+## Find your way around
 
-No requirements.
+- [Routes](config/routes.rb): consumer entry points and APIs.
+- [Controllers](app/controllers/): sign-in, callback and API behaviour.
+- [Services](app/services/): Cognito and token operations.
+- [Passwordless flow diagram](docs/passwordless_login_flow.png): sign-in overview.
+- [Deployment workflows](.github/workflows/): maintainer deployment configuration.
 
-## Providers
+## Contribute
 
-No providers.
+Read [CONTRIBUTING.md](CONTRIBUTING.md) for the fork workflow, checks and private
+security reporting.
 
-## Modules
+## Licence
 
-No modules.
-
-## Resources
-
-No resources.
-
-## Inputs
-
-No inputs.
-
-## Outputs
-
-No outputs.
-<!-- END_TF_DOCS -->
+The code and associated documentation use the [MIT licence](LICENCE.md), with
+Crown copyright (HM Revenue & Customs). Dependencies retain their own licences.
