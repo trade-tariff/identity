@@ -2,7 +2,7 @@
 # EventBridge triggers the job with a command override for the specific task.
 
 module "identity-job" {
-  source = "git@github.com:trade-tariff/trade-tariff-platform-terraform-modules.git//aws/ecs-service?ref=aws/ecs-service-v1.21.0"
+  source = "git@github.com:trade-tariff/trade-tariff-platform-terraform-modules.git//aws/ecs-service?ref=aws/ecs-service-v3.3.1"
 
   region = var.region
 
@@ -27,8 +27,13 @@ module "identity-job" {
 
   enable_ecs_exec = true
   has_autoscaler  = false
-  max_capacity    = 1
-  min_capacity    = 0
+
+  readonly_root_filesystem = true
+  writable_paths           = local.writable_paths
+  container_user           = local.container_user
+
+  max_capacity = 1
+  min_capacity = 0
 }
 
 data "aws_ecs_task_definition" "identity_job" {
