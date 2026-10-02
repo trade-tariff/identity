@@ -27,8 +27,16 @@ module "identity-job" {
 
   enable_ecs_exec = true
   has_autoscaler  = false
-  max_capacity    = 1
-  min_capacity    = 0
+
+  # The image runs as `tariff` with no pinned uid/gid, so container_user uses the name.
+  # The module's init container chowns the writable mounts to it so the job can write
+  # to the Rails tmp and log directories under WORKDIR /app.
+  readonly_root_filesystem = true
+  writable_paths           = ["/tmp", "/app/tmp", "/app/log"]
+  container_user           = "tariff:tariff"
+
+  max_capacity = 1
+  min_capacity = 0
 }
 
 data "aws_ecs_task_definition" "identity_job" {
