@@ -28,15 +28,9 @@ module "identity-job" {
   enable_ecs_exec = true
   has_autoscaler  = false
 
-  # WORKDIR is /app, so Rails.root-relative paths resolve there.
-  #   /tmp      - general scratch
-  #   /app/tmp  - bootsnap, loaded in config/boot.rb; without it the app fails to boot
-  #   /app/log  - the New Relic agent's own log file (newrelic.yml sets no log_file)
-  # container_user matches the uid/gid pinned in the Dockerfile; the module's init
-  # container chowns the writable mounts to it so the non-root process can write to them.
   readonly_root_filesystem = true
-  writable_paths           = ["/tmp", "/app/tmp", "/app/log"]
-  container_user           = "1000:1000"
+  writable_paths           = local.writable_paths
+  container_user           = local.container_user
 
   max_capacity = 1
   min_capacity = 0

@@ -30,6 +30,10 @@ module "service" {
 
   enable_ecs_exec = true
 
+  readonly_root_filesystem = true
+  writable_paths           = local.writable_paths
+  container_user           = local.container_user
+
   min_capacity       = var.min_capacity
   max_capacity       = var.max_capacity
   has_autoscaler     = local.has_autoscaler
