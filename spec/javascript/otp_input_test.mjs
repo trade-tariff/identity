@@ -26,7 +26,7 @@ async function form (t, value = '') {
   const type = (index, text) => {
     boxes[index].focus()
     boxes[index].value = text
-    boxes[index].dispatchEvent(new dom.window.Event('input', { bubbles: true }))
+    boxes[index].dispatchEvent(new dom.window.InputEvent('input', { data: text, inputType: 'insertText', bubbles: true }))
   }
   const paste = (index, text) => {
     const event = new dom.window.Event('paste', { bubbles: true, cancelable: true })
@@ -60,6 +60,18 @@ test('typing advances focus and submits all digits, including a leading zero', a
     assert.equal(document.activeElement, boxes[Math.min(index + 1, 5)])
   })
   assert.equal(code(), '012345')
+})
+
+test('typing at the end of a populated box replaces only that digit', async t => {
+  const { dom, document, boxes, code } = await form(t, '012345')
+  const box = boxes[3]
+  box.focus()
+  box.setSelectionRange(1, 1)
+  box.setRangeText('9', box.selectionStart, box.selectionEnd, 'end')
+  box.dispatchEvent(new dom.window.InputEvent('input', { data: '9', inputType: 'insertText', bubbles: true }))
+  assert.deepEqual(boxes.map(box => box.value), ['0', '1', '2', '9', '4', '5'])
+  assert.equal(code(), '012945')
+  assert.equal(document.activeElement, boxes[4])
 })
 
 test('pasting a complete code into any box replaces all six boxes', async t => {

@@ -38,8 +38,8 @@ export function initOtpInput (input) {
 
   boxes.forEach((box, index) => {
     box.addEventListener('focus', () => box.select())
-    box.addEventListener('input', () => {
-      const value = box.value
+    box.addEventListener('input', event => {
+      const value = event.inputType === 'insertText' && event.data?.length === 1 ? event.data : box.value
       box.value = ''
       insert(value, index)
       sync()
