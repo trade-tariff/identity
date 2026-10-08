@@ -37,5 +37,9 @@
 /.pre-commit-config-nix.yaml
 
 /vendor/bundle
+/node_modules
+/public/assets/*
+!/public/assets/fonts/
+!/public/assets/images/
 /coverage
 /spec/tmp

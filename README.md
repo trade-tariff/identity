@@ -42,10 +42,27 @@ Use disposable test identities, not production accounts.
 bundle exec rspec
 bundle exec rubocop
 bundle exec brakeman
+npm ci --ignore-scripts
+RAILS_ENV=test bin/rails assets:precompile
+npm test
 ```
 
 See [CI configuration](.github/workflows/ci.yml) for the current checks.
 Authentication and credential-management changes need security-focused review.
+The JavaScript checks use Node.js 24 and jsdom. These are test dependencies only.
+
+### Update GOV.UK Frontend
+
+Use `bin/importmap pin govuk-frontend@VERSION`. The automated updater uses the
+same command. The binstub selects the complete, versioned GOV.UK distribution.
+Do not vendor `dist/govuk/all.mjs` alone: its relative imports need additional
+files and prevent the application from loading when those files are absent.
+The asset checks load the precompiled bundle and check its module dependencies.
+
+The code-entry form starts as a standard text input so sign-in does not require
+JavaScript. JavaScript enhances it into six boxes with paste and autofill support.
+The no-JavaScript feature specs submit the real form with Cognito mocked. The
+JavaScript tests cover the enhanced boxes and the precompiled module dependencies.
 
 ## Find your way around
 
