@@ -6,6 +6,12 @@
 .ruby-lsp
 coverage
 log
+node_modules
+package.json
+package-lock.json
+public/assets/*
+!public/assets/fonts/
+!public/assets/images/
 spec
 terraform
 tmp

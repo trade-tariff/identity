@@ -1,4 +1,10 @@
 #!/usr/bin/env ruby
 
 require_relative "../config/application"
+require "importmap/packager"
+require_relative "../lib/govuk_frontend_packager"
+
+# The update action calls this binstub. Keep automated and manual pins identical.
+Importmap::Packager.prepend(GovukFrontendPackager)
+
 require "importmap/commands"
