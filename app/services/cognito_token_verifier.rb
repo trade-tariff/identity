@@ -8,6 +8,9 @@ class CognitoTokenVerifier
   end
 
   def self.jwks_url
+    base_url = ENV["COGNITO_JWKS_BASE_URL"]
+    return "#{base_url}/#{TradeTariffIdentity.cognito_user_pool_id}/.well-known/jwks.json" if base_url.present?
+
     "#{issuer}/.well-known/jwks.json"
   end
 
@@ -43,7 +46,7 @@ private
   end
 
   def decrypt_token_if_needed
-    return token if TradeTariffIdentity.bypass_cognito?
+    return token if Rails.env.development? || TradeTariffIdentity.bypass_cognito?
 
     EncryptionService.decrypt_string(token)
   end

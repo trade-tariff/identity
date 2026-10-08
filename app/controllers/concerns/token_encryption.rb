@@ -6,7 +6,7 @@ module TokenEncryption
 private
 
   def encrypted(token)
-    if TradeTariffIdentity.bypass_cognito?
+    if Rails.env.development? || TradeTariffIdentity.bypass_cognito?
       token
     else
       EncryptionService.encrypt_string(token)

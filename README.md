@@ -23,10 +23,15 @@ in `.env.development.local`, and keep secrets outside Git. Open
 <http://localhost:3005/myott> for the MyOTT consumer. The consuming application
 must also be running at its configured callback URL to complete the journey.
 
-Rails development uses the local Cognito bypass in
-[lib/trade_tariff_identity.rb](lib/trade_tariff_identity.rb). It does not prove
-that real Cognito authentication works. Never enable a development bypass to
-circumvent access controls in a shared environment.
+Rails development uses the local Cognito bypass by default in
+[lib/trade_tariff_identity.rb](lib/trade_tariff_identity.rb). Set
+`BYPASS_COGNITO=false` to verify Cognito tokens in development. For a local AWS
+emulator, configure `AWS_ENDPOINT_URL_COGNITO_IDENTITY_PROVIDER` and
+`COGNITO_JWKS_BASE_URL` (for example, `http://ministack:4566`). The signing-key
+endpoint does not change the expected AWS token issuer or disable signature
+verification. Development cookies remain unencrypted, as the consuming apps
+expect. Never enable a development bypass to circumvent access controls in a
+shared environment.
 
 For an authorised Cognito integration environment, configure `AWS_REGION`,
 `COGNITO_USER_POOL_ID`, `COGNITO_CLIENT_ID` and the required AWS credentials.
