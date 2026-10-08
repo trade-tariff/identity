@@ -8,7 +8,8 @@ class CognitoTokenVerifier
   end
 
   def self.jwks_url
-    base_url = ENV["COGNITO_JWKS_BASE_URL"]
+    # Development only: outside development, keys always come from the AWS issuer.
+    base_url = ENV["COGNITO_JWKS_BASE_URL"] if Rails.env.development?
     return "#{base_url}/#{TradeTariffIdentity.cognito_user_pool_id}/.well-known/jwks.json" if base_url.present?
 
     "#{issuer}/.well-known/jwks.json"
@@ -73,8 +74,9 @@ private
   end
 
   def fetch_jwks_keys
-    Rails.cache.fetch("cognito_jwks_keys", expires_in: 1.hour) do
-      response = Faraday.get(self.class.jwks_url)
+    url = self.class.jwks_url
+    Rails.cache.fetch("cognito_jwks_keys:#{url}", expires_in: 1.hour) do
+      response = Faraday.get(url)
       JSON.parse(response.body)["keys"] if response.success?
     end
   end

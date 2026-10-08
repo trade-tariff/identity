@@ -43,12 +43,21 @@ RSpec.describe CognitoTokenVerifier do
       expect(second_jwks_url).to eq("https://cognito-idp.us-west-1.amazonaws.com/pool-444/.well-known/jwks.json")
     end
 
-    it "uses the configured key endpoint without changing the issuer", :aggregate_failures do
+    it "uses the configured key endpoint in development without changing the issuer", :aggregate_failures do
+      allow(Rails.env).to receive(:development?).and_return(true)
       allow(ENV).to receive(:[]).with("COGNITO_JWKS_BASE_URL").and_return("http://ministack:4566")
       allow(ENV).to receive(:[]).with("COGNITO_USER_POOL_ID").and_return("pool-333")
 
       expect(described_class.jwks_url).to eq("http://ministack:4566/pool-333/.well-known/jwks.json")
       expect(described_class.issuer).to eq("https://cognito-idp.us-east-1.amazonaws.com/pool-333")
+    end
+
+    it "ignores the configured key endpoint outside development" do
+      allow(Rails.env).to receive(:development?).and_return(false)
+      allow(ENV).to receive(:[]).with("COGNITO_JWKS_BASE_URL").and_return("http://attacker.example.test")
+      allow(ENV).to receive(:[]).with("COGNITO_USER_POOL_ID").and_return("pool-333")
+
+      expect(described_class.jwks_url).to eq("https://cognito-idp.us-east-1.amazonaws.com/pool-333/.well-known/jwks.json")
     end
 
     it "raises an error when AWS_REGION is missing" do
@@ -101,6 +110,31 @@ RSpec.describe CognitoTokenVerifier do
     it "rejects missing keys" do
       allow(Faraday).to receive(:get).with(described_class.jwks_url).and_return(instance_double(Faraday::Response, success?: false))
       expect(described_class.call(token, consumer)).to eq(:invalid)
+    end
+
+    context "when the key address changes after keys are cached" do
+      let(:key_address) { { url: nil } }
+
+      def serve_keys_signed_by(signing_key)
+        keys = { "keys" => [JWT::JWK.new(signing_key, "local-key").export] }
+        allow(Faraday).to receive(:get).with(described_class.jwks_url).and_return(
+          instance_double(Faraday::Response, success?: true, body: keys.to_json),
+        )
+      end
+
+      before do
+        allow(Rails).to receive(:cache).and_return(ActiveSupport::Cache::MemoryStore.new)
+        allow(ENV).to receive(:[]).and_call_original
+        allow(ENV).to receive(:[]).with("COGNITO_JWKS_BASE_URL") { key_address[:url] }
+        serve_keys_signed_by(OpenSSL::PKey::RSA.generate(2048))
+        described_class.call(token, consumer)
+        key_address[:url] = "http://ministack:4566"
+        serve_keys_signed_by(key)
+      end
+
+      it "uses the keys from the new address" do
+        expect(described_class.call(token, consumer)).to eq(:valid)
+      end
     end
   end
 
