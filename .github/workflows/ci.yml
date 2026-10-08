@@ -29,6 +29,7 @@ jobs:
             terraform/versions.tf
             *.md
             *.lock
+            package-lock.json
             .github
 
   lint:
