@@ -61,8 +61,16 @@ RSpec.describe TradeTariffIdentity do
     context "when Rails.env is development" do
       before { allow(Rails.env).to receive(:development?).and_return(true) }
 
-      it "returns true regardless of BYPASS_COGNITO" do
+      it "returns true by default" do
+        allow(ENV).to receive(:[]).with("BYPASS_COGNITO").and_return(nil)
+
         expect(described_class.bypass_cognito?).to be(true)
+      end
+
+      it "returns false when explicitly disabled" do
+        allow(ENV).to receive(:[]).with("BYPASS_COGNITO").and_return("false")
+
+        expect(described_class.bypass_cognito?).to be(false)
       end
     end
 
