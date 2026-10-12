@@ -52,7 +52,7 @@ module TradeTariffIdentity
     end
 
     def bypass_cognito?
-      Rails.env.development? || (ENV["BYPASS_COGNITO"] == "true")
+      (Rails.env.development? && ENV["BYPASS_COGNITO"] != "false") || (ENV["BYPASS_COGNITO"] == "true")
     end
 
     def feedback_url

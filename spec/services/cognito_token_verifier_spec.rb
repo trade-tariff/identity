@@ -32,6 +32,7 @@ RSpec.describe CognitoTokenVerifier do
     before do
       allow(ENV).to receive(:fetch).with("AWS_REGION").and_return("us-east-1", "us-west-1")
       allow(ENV).to receive(:[]).with("COGNITO_USER_POOL_ID").and_return("pool-333", "pool-444")
+      allow(ENV).to receive(:[]).with("COGNITO_JWKS_BASE_URL").and_return(nil)
     end
 
     it "reflects the current AWS_REGION and COGNITO_USER_POOL_ID env vars", :aggregate_failures do
@@ -40,6 +41,23 @@ RSpec.describe CognitoTokenVerifier do
 
       expect(first_jwks_url).to eq("https://cognito-idp.us-east-1.amazonaws.com/pool-333/.well-known/jwks.json")
       expect(second_jwks_url).to eq("https://cognito-idp.us-west-1.amazonaws.com/pool-444/.well-known/jwks.json")
+    end
+
+    it "uses the configured key endpoint in development without changing the issuer", :aggregate_failures do
+      allow(Rails.env).to receive(:development?).and_return(true)
+      allow(ENV).to receive(:[]).with("COGNITO_JWKS_BASE_URL").and_return("http://ministack:4566")
+      allow(ENV).to receive(:[]).with("COGNITO_USER_POOL_ID").and_return("pool-333")
+
+      expect(described_class.jwks_url).to eq("http://ministack:4566/pool-333/.well-known/jwks.json")
+      expect(described_class.issuer).to eq("https://cognito-idp.us-east-1.amazonaws.com/pool-333")
+    end
+
+    it "ignores the configured key endpoint outside development" do
+      allow(Rails.env).to receive(:development?).and_return(false)
+      allow(ENV).to receive(:[]).with("COGNITO_JWKS_BASE_URL").and_return("http://attacker.example.test")
+      allow(ENV).to receive(:[]).with("COGNITO_USER_POOL_ID").and_return("pool-333")
+
+      expect(described_class.jwks_url).to eq("https://cognito-idp.us-east-1.amazonaws.com/pool-333/.well-known/jwks.json")
     end
 
     it "raises an error when AWS_REGION is missing" do
@@ -52,6 +70,71 @@ RSpec.describe CognitoTokenVerifier do
       allow(ENV).to receive(:[]).with("COGNITO_USER_POOL_ID").and_return(nil)
 
       expect { described_class.jwks_url }.to raise_error(KeyError)
+    end
+  end
+
+  describe "signed local tokens" do
+    let(:key) { OpenSSL::PKey::RSA.generate(2048) }
+    let(:consumer) { build(:consumer, id: "myott") }
+    let(:payload) { { "sub" => "local-account", "iss" => described_class.issuer, "cognito:groups" => %w[myott], "exp" => 1.hour.from_now.to_i } }
+    let(:token) { JWT.encode(payload, key, "RS256", kid: "local-key") }
+
+    before do
+      allow(Rails.env).to receive(:development?).and_return(true)
+      allow(TradeTariffIdentity).to receive_messages(bypass_cognito?: false, cognito_user_pool_id: "local-pool")
+      keys = { "keys" => [JWT::JWK.new(key, "local-key").export] }
+      allow(Faraday).to receive(:get).with(described_class.jwks_url).and_return(
+        instance_double(Faraday::Response, success?: true, body: keys.to_json),
+      )
+    end
+
+    it "accepts a signed token in the consumer group" do
+      expect(described_class.call(token, consumer)).to eq(:valid)
+    end
+
+    it "rejects a different signing key" do
+      forged = JWT.encode(payload, OpenSSL::PKey::RSA.generate(2048), "RS256", kid: "local-key")
+      expect(described_class.call(forged, consumer)).to eq(:invalid)
+    end
+
+    it "rejects the wrong issuer" do
+      payload["iss"] = "https://wrong.example.test"
+      expect(described_class.call(token, consumer)).to eq(:invalid)
+    end
+
+    it "rejects the wrong group" do
+      payload["cognito:groups"] = %w[admin]
+      expect(described_class.call(token, consumer)).to eq(:invalid)
+    end
+
+    it "rejects missing keys" do
+      allow(Faraday).to receive(:get).with(described_class.jwks_url).and_return(instance_double(Faraday::Response, success?: false))
+      expect(described_class.call(token, consumer)).to eq(:invalid)
+    end
+
+    context "when the key address changes after keys are cached" do
+      let(:key_address) { { url: nil } }
+
+      def serve_keys_signed_by(signing_key)
+        keys = { "keys" => [JWT::JWK.new(signing_key, "local-key").export] }
+        allow(Faraday).to receive(:get).with(described_class.jwks_url).and_return(
+          instance_double(Faraday::Response, success?: true, body: keys.to_json),
+        )
+      end
+
+      before do
+        allow(Rails).to receive(:cache).and_return(ActiveSupport::Cache::MemoryStore.new)
+        allow(ENV).to receive(:[]).and_call_original
+        allow(ENV).to receive(:[]).with("COGNITO_JWKS_BASE_URL") { key_address[:url] }
+        serve_keys_signed_by(OpenSSL::PKey::RSA.generate(2048))
+        described_class.call(token, consumer)
+        key_address[:url] = "http://ministack:4566"
+        serve_keys_signed_by(key)
+      end
+
+      it "uses the keys from the new address" do
+        expect(described_class.call(token, consumer)).to eq(:valid)
+      end
     end
   end
 
@@ -77,6 +160,19 @@ RSpec.describe CognitoTokenVerifier do
 
       it "verifies the token" do
         described_class.call(token, consumer)
+        expect(JWT).to have_received(:decode).with(token, nil, true, algorithms: %w[RS256], jwks: hash_including(:keys), iss: described_class.issuer, verify_iss: true)
+      end
+    end
+
+    context "when development uses local Cognito" do
+      before do
+        allow(Rails.env).to receive(:development?).and_return(true)
+        allow(TradeTariffIdentity).to receive(:bypass_cognito?).and_return(false)
+      end
+
+      it "verifies the plaintext development token with signing keys", :aggregate_failures do
+        expect(described_class.call(token, consumer)).to eq(:valid)
+        expect(EncryptionService).not_to have_received(:decrypt_string)
         expect(JWT).to have_received(:decode).with(token, nil, true, algorithms: %w[RS256], jwks: hash_including(:keys), iss: described_class.issuer, verify_iss: true)
       end
     end

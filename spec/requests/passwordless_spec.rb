@@ -157,6 +157,13 @@ RSpec.describe "Passwordless", type: :request do
         expect(response.body).to include("The code you entered is incorrect")
       end
 
+      it "issues no authentication cookies or success callback", :aggregate_failures do
+        post verify_passwordless_path, params: { passwordless_code_form: { code: "999999" } }
+        expect(cookies["id_token"]).to be_nil
+        expect(cookies["refresh_token"]).to be_nil
+        expect(response).not_to be_redirect
+      end
+
       it "stores the new Cognito session for the next attempt" do
         post verify_passwordless_path, params: { passwordless_code_form: { code: "999999" } }
         expect(session[:login]).to eq("new-cognito-session")
@@ -172,6 +179,14 @@ RSpec.describe "Passwordless", type: :request do
 
         expect(response).to have_http_status(:ok)
         expect(response.body).to include("Request a new code")
+      end
+
+      it "issues no authentication cookies or success callback", :aggregate_failures do
+        allow(cognito).to receive(:respond_to_auth_challenge).and_raise(Aws::CognitoIdentityProvider::Errors::NotAuthorizedException.new(nil, "Not authorized"))
+        post passwordless_path, params: { passwordless_form: { email: } }
+        post verify_passwordless_path, params: { passwordless_code_form: { code: "999999" } }
+        expect([cookies["id_token"], cookies["refresh_token"]]).to eq([nil, nil])
+        expect(response).not_to be_redirect
       end
     end
 
