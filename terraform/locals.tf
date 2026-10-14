@@ -1,4 +1,10 @@
 locals {
+  # Cost allocation tags. Activate them in the Billing console so Cost Explorer
+  # can group costs by component. The module copies them to each Fargate task.
+  cost_allocation_tags = {
+    Component = "identity"
+  }
+
   account_id     = data.aws_caller_identity.current.account_id
   has_autoscaler = var.environment == "development" ? false : true
   secret_value   = try(data.aws_secretsmanager_secret_version.this.secret_string, "{}")
