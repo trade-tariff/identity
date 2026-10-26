@@ -480,7 +480,8 @@
                 done
                 bundle check || bundle install --local
                 bundle binstubs --all
-                cp -a /deps/node_modules /workspace/node_modules
+                mkdir -p /workspace/node_modules
+                cp -a /deps/node_modules/. /workspace/node_modules/
                 npm ls --all --offline
                 printf 'disable_checkpoint = true\nprovider_installation {\n filesystem_mirror {\n path = "/deps/terraform-inputs/providers"\n include = ["registry.terraform.io/*/*"]\n }\n}\n' > "$TF_CLI_CONFIG_FILE"
                 files="$(git ls-files '*.tf')"
